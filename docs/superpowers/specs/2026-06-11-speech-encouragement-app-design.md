@@ -70,9 +70,84 @@ Per trial: timestamp, word, channel fired, latency to first attempt, re-prompt c
 - **Phase 1** — MVP loop: voice + gated VAD + caregiver button + state machine + reward screen. ✅
 - **Phase 2** — vision channel (jawOpen). ✅
 - **Phase 3** — caregiver settings, logging, progress view. ✅
+- **Phase 3.5** — researcher-style audio capture & review (designed below). Next.
 - **Phase 4** — optional: Kokoro-82M in-browser, Whisper-tiny "getting closer" layer (additive only). Future.
-- **Phase 5** — personalization: tiny classifier on his own sounds (Python → ONNX). Future.
+- **Phase 5** — personalization: tiny classifier on his own sounds (Python → ONNX). Future. **Fed directly by the labeled clips from Phase 3.5.**
 - **Phase 6** — packaging: PWA install now; Capacitor/Tauri wrap later, no rewrite.
+
+## Phase 3.5 — Researcher-style audio capture & review (planned)
+
+Record his vocalizations the way a researcher would — event-sampled, metadata-tagged,
+labeled later — so a caregiver or SLP can interpret attempts after the session, and so
+Phase 5 has a real training set.
+
+### Capture: peri-event clips, not continuous recording
+
+- During LISTEN, keep a **rolling ring buffer** (~5 s) of raw 16 kHz mic audio. The
+  vad-web `onFrameProcessed` callback already delivers every frame, so this costs
+  almost nothing.
+- When **any** channel fires (audio, mouth, manual), persist a window around the
+  attempt: ~3 s before through ~2 s after. This captures the sound even when the VAD
+  was not the channel that detected it — silent mouthing with a faint sound, a
+  caregiver tap on something the detectors missed. Those near-misses are exactly the
+  audio worth studying (and the evidence for re-tuning sensitivity).
+- Optional toggle: also save the full listen window on **timeout** trials, to audit
+  what the detectors are failing to hear.
+- Encode to WAV in a small worker; never block the UI.
+
+### Metadata: a clip without context is noise
+
+Each clip stores: sessionId, timestamp, target word, channel that fired (or `null`
+on timeout), latency, re-prompt count — the same record as the session log, joined by
+trial id.
+
+### Review screen: SLP-style labeling
+
+- List clips grouped by word / date; tap to play.
+- Label each on the standard shaping ladder:
+  `0 — no vocalization · 1 — any sound · 2 — approximation (right vowel / syllable count) · 3 — recognizable word`
+  plus a free-text note.
+- Labels feed two things: per-word progress trends ("apple is mostly 2s now"), and the
+  Phase 5 supervised training set (export below).
+
+### Storage, export, retention
+
+- **IndexedDB** for WAV blobs (localStorage cannot hold audio); metadata stays in the
+  trial log keyed by trial id.
+- Visible storage usage; per-clip delete; delete-all; retention cap (default: newest
+  ~200 clips, oldest evicted first).
+- Export: a zip of WAVs + a CSV of metadata and labels — for the SLP, or as the
+  labeled dataset for `tools/train_personal_model.py`.
+
+### Consent & privacy posture
+
+- Recording is **off by default**; enabled only in caregiver settings with a
+  plain-language explanation.
+- A small persistent 🔴 indicator is shown during sessions while recording is on.
+- Everything stays on-device, as with all other data. He cannot consent in the usual
+  way, so recordings are treated as **his data held in trust**: minimal retention,
+  effortless deletion, never uploaded, export is a deliberate caregiver act.
+
+## Improvement ideas (backlog, roughly by value)
+
+1. **Caregiver-recorded prompts.** Let a parent record "Alex, can you say apple?" in
+   their own voice — likely more salient than any TTS. The Phase 3.5 recording
+   infrastructure doubles as the recorder; clips drop into `public/clips/`-equivalent
+   IndexedDB slots that playClip checks first.
+2. **Live calibration meter.** A settings screen showing real-time VAD probability and
+   jawOpen score so the caregiver can watch what registers and tune by observation;
+   a 10-second room-noise sample suggests a starting audio threshold.
+3. **Reactive listening ring.** Make the breathing ring respond instantly to his sound
+   level during LISTEN — immediate cause-and-effect even before the celebration.
+4. **Real photos instead of emoji.** The caregiver photographs his actual ball/cup;
+   personally meaningful, concrete images generalize better for many autistic
+   learners. Stored in IndexedDB alongside the word list.
+5. **Per-word shaping suggestions.** Once labels exist: "most attempts at *apple* are
+   level 2 — consider celebrating only 1+ sounds for it" (always caregiver-decided,
+   never automatic).
+6. **Screen wake lock** during sessions so a tablet doesn't dim mid-listen.
+7. **Reward variety per his preferences** — selectable celebration themes (stars,
+   bubbles, a favorite character image), still slow and non-flashing.
 
 ## Testing
 
