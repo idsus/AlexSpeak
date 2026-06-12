@@ -1,4 +1,9 @@
 import { MicVAD } from '@ricky0123/vad-web'
+// ORT's wasm loader must come through Vite's asset pipeline (?url), not from
+// public/ — onnxruntime-web loads it with a dynamic import(), and Vite's dev
+// server refuses JS imports of public-directory files (500).
+import ortWasmUrl from 'onnxruntime-web/ort-wasm-simd-threaded.wasm?url'
+import ortMjsUrl from 'onnxruntime-web/ort-wasm-simd-threaded.mjs?url'
 import { getMicStream } from './useMic'
 
 // Silero VAD wrapper, tuned hot: the cost of missing a real attempt
@@ -19,7 +24,11 @@ export class VadChannel {
     const vad = await MicVAD.new({
       model: 'v5',
       baseAssetPath: '/models/vad/',
-      onnxWASMBasePath: '/models/vad/',
+      // Runs after MicVAD applies onnxWASMBasePath, so this wins. The object
+      // form points ORT at the exact loader/wasm assets bundled by Vite.
+      ortConfig: (ort) => {
+        ort.env.wasm.wasmPaths = { mjs: ortMjsUrl, wasm: ortWasmUrl }
+      },
       getStream: getMicStream,
       startOnLoad: false,
       positiveSpeechThreshold: options.sensitivity,

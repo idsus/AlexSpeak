@@ -107,7 +107,8 @@ export default function App() {
         onAttempt: () => fuser.report('audio'),
       })
       await vadRef.current.pause()
-    } catch {
+    } catch (error) {
+      console.warn('VAD channel unavailable:', error)
       notices.push('Sound detection unavailable')
     }
 
@@ -123,7 +124,8 @@ export default function App() {
           sensitivity: settingsRef.current.mouthSensitivity,
           onAttempt: () => fuser.report('mouth'),
         })
-      } catch {
+      } catch (error) {
+        console.warn('Mouth channel unavailable:', error)
         notices.push('Mouth detection unavailable')
       }
     }
@@ -138,6 +140,8 @@ export default function App() {
   function stopSession() {
     stopAllPlayback()
     dispatch({ type: 'STOP' })
+    teardownChannels()
+    setView('home')
   }
 
   // Side effects per phase. The state machine is pure; everything async
@@ -228,11 +232,12 @@ export default function App() {
         break
       }
 
-      case 'idle': {
-        teardownChannels()
-        setView('home')
+      // 'idle' is deliberately not handled here: this effect re-runs when the
+      // view changes, and entering the session view happens while the machine
+      // is still idle — a teardown here would cancel the session as it starts.
+      // Teardown lives in stopSession() and the DISMISS handler instead.
+      case 'idle':
         break
-      }
     }
 
     return () => {
@@ -335,7 +340,13 @@ export default function App() {
                 {engineState.successCount} wonderful{' '}
                 {engineState.successCount === 1 ? 'try' : 'tries'} today
               </div>
-              <button className="btn-primary" onClick={() => dispatch({ type: 'DISMISS' })}>
+              <button
+                className="btn-primary"
+                onClick={() => {
+                  dispatch({ type: 'DISMISS' })
+                  setView('home')
+                }}
+              >
                 🏠 Home
               </button>
             </div>

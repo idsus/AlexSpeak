@@ -29,9 +29,8 @@ const copies = [
     '@ricky0123/vad-web/dist/vad.worklet.bundle.min.js',
     join(vadDir, 'vad.worklet.bundle.min.js'),
   ],
-  // ONNX Runtime Web wasm backend (the non-jsep build vad-web uses)
-  ['onnxruntime-web/dist/ort-wasm-simd-threaded.wasm', join(vadDir, 'ort-wasm-simd-threaded.wasm')],
-  ['onnxruntime-web/dist/ort-wasm-simd-threaded.mjs', join(vadDir, 'ort-wasm-simd-threaded.mjs')],
+  // (ONNX Runtime wasm is NOT copied here — src/audio/useVAD.ts imports it
+  // with ?url so Vite bundles it; public-dir copies would 500 in dev.)
   // MediaPipe vision wasm runtime
   [
     '@mediapipe/tasks-vision/wasm/vision_wasm_internal.js',

@@ -33,15 +33,19 @@ export class MouthChannel {
     options: MouthChannelOptions,
   ): Promise<MouthChannel> {
     const fileset = await FilesetResolver.forVisionTasks('/models/mediapipe/wasm')
-    const landmarker = await FaceLandmarker.createFromOptions(fileset, {
-      baseOptions: {
-        modelAssetPath: '/models/mediapipe/face_landmarker.task',
-        delegate: 'GPU',
-      },
-      runningMode: 'VIDEO',
-      numFaces: 1,
-      outputFaceBlendshapes: true,
-    })
+    const createWith = (delegate: 'GPU' | 'CPU') =>
+      FaceLandmarker.createFromOptions(fileset, {
+        baseOptions: {
+          modelAssetPath: '/models/mediapipe/face_landmarker.task',
+          delegate,
+        },
+        runningMode: 'VIDEO',
+        numFaces: 1,
+        outputFaceBlendshapes: true,
+      })
+    // Older tablets (and headless test browsers) lack the WebGL support the
+    // GPU delegate needs — fall back to CPU rather than losing the channel.
+    const landmarker = await createWith('GPU').catch(() => createWith('CPU'))
     return new MouthChannel(landmarker, video, options.onAttempt, options.sensitivity)
   }
 
