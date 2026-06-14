@@ -174,7 +174,8 @@ body {
   font-size: clamp(52px, 11vmin, 118px);
   font-weight: 750;
   letter-spacing: 0;
-  line-height: 0.95;
+  /* Enough line-height to keep descenders (y, g, p, j) from clipping. */
+  line-height: 1.1;
 }
 
 .subtitle {
@@ -239,7 +240,10 @@ body {
 .say-word {
   margin: 0;
   font-size: clamp(76px, 21vmin, 220px);
-  line-height: 0.92;
+  /* Roomy line-height + a little padding so descenders (y, g, p, j) are not
+     clipped by background-clip: text. */
+  line-height: 1.15;
+  padding-bottom: 0.12em;
   font-weight: 800;
   letter-spacing: 0.01em;
   background: linear-gradient(115deg, #b56f3a, #e09a4a, #7d9db7, #b56f3a);
