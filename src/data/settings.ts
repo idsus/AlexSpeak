@@ -96,7 +96,7 @@ export function sanitizeWords(value: unknown): WordEntry[] {
   return cleaned.length ? cleaned : DEFAULT_SETTINGS.words.map((w) => ({ ...w }))
 }
 
-export type WordLevelId = 'level1' | 'level2' | 'level3'
+export type WordLevelId = 'level0' | 'level1' | 'level2' | 'level3'
 
 export interface WordLevel {
   id: WordLevelId
@@ -130,6 +130,12 @@ function buildLevel(
 // Leveled curriculum: pick a difficulty, and endless mode cycles that level's
 // words. Level 1 starts with the easiest first sounds and words.
 export const WORD_LEVELS: WordLevel[] = [
+  buildLevel('level0', 'Level 0', 'Letters A to Z', 'imitateSound', [
+    ['a', 'A'], ['b', 'B'], ['c', 'C'], ['d', 'D'], ['e', 'E'], ['f', 'F'], ['g', 'G'],
+    ['h', 'H'], ['i', 'I'], ['j', 'J'], ['k', 'K'], ['l', 'L'], ['m', 'M'], ['n', 'N'],
+    ['o', 'O'], ['p', 'P'], ['q', 'Q'], ['r', 'R'], ['s', 'S'], ['t', 'T'], ['u', 'U'],
+    ['v', 'V'], ['w', 'W'], ['x', 'X'], ['y', 'Y'], ['z', 'Z'],
+  ]),
   buildLevel('level1', 'Level 1', 'First sounds and first words', 'imitateSound', [
     ['ma', '👩'], ['ba', '👄'], ['da', '👨'], ['pa', '👄'], ['hi', '👋'], ['bye', '👋'],
     ['no', '🙅'], ['yes', '👍'], ['up', '⬆️'], ['go', '🚗'], ['more', '🙌'], ['ball', '⚽'],

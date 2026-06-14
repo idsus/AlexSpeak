@@ -3,9 +3,12 @@ import { DEFAULT_SETTINGS, WORD_LEVELS, loadSettings, saveSettings, wordsForLeve
 import { MemoryStorage } from './memoryStorage'
 
 describe('leveled curriculum', () => {
-  it('exposes three ordered levels, easiest first', () => {
-    expect(WORD_LEVELS.map((l) => l.id)).toEqual(['level1', 'level2', 'level3'])
-    expect(WORD_LEVELS[0].words[0].word).toBe('ma')
+  it('exposes ordered levels, easiest first (letters, then sounds, then words)', () => {
+    expect(WORD_LEVELS.map((l) => l.id)).toEqual(['level0', 'level1', 'level2', 'level3'])
+    // Level 0 is the alphabet.
+    expect(WORD_LEVELS[0].words[0].word).toBe('a')
+    expect(WORD_LEVELS[0].words).toHaveLength(26)
+    expect(WORD_LEVELS[1].words[0].word).toBe('ma')
   })
 
   it('wordsForLevel returns normalized, independent copies', () => {
@@ -20,8 +23,8 @@ describe('leveled curriculum', () => {
     expect(a[0]).toHaveProperty('shapingLevel')
   })
 
-  it('falls back to level 1 for an unknown level id', () => {
-    expect(wordsForLevel('nope' as never)).toEqual(wordsForLevel('level1'))
+  it('falls back to the first level for an unknown level id', () => {
+    expect(wordsForLevel('nope' as never)).toEqual(wordsForLevel('level0'))
   })
 })
 
