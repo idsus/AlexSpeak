@@ -47,8 +47,11 @@ export interface Settings {
   devMode: boolean
   soundEnabled: boolean
   volume: number
-  /** 'system' speaks with the chosen browser voice; 'recorded' prefers /clips. */
-  voiceMode: 'system' | 'recorded'
+  /** 'server' = warm Kokoro voice via the local /api/tts server (consistent in
+   *  any browser); 'system' = browser voice; 'recorded' = /clips first. */
+  voiceMode: 'server' | 'system' | 'recorded'
+  /** Kokoro voice id used by the server voice (e.g. 'af_heart'). */
+  serverVoice: string
   /** Preferred Web Speech API voice for the fallback TTS; null = browser default. */
   voiceName: string | null
 }
@@ -114,15 +117,17 @@ function buildLevel(
   label: string,
   description: string,
   shapingLevel: ShapingLevel,
-  pairs: [string, string][],
+  // [word, emoji] or [word, emoji, spokenSound] — spokenSound controls how the
+  // coach pronounces it (e.g. the letter 'y' is spoken as "why").
+  pairs: [string, string, string?][],
 ): WordLevel {
   return {
     id,
     label,
     description,
     shapingLevel,
-    words: pairs.map(([word, emoji]) =>
-      normalizeWordEntry({ word, emoji, targetSound: word, reward: '', shapingLevel }),
+    words: pairs.map(([word, emoji, sound]) =>
+      normalizeWordEntry({ word, emoji, targetSound: sound ?? word, reward: '', shapingLevel }),
     ),
   }
 }
@@ -131,10 +136,13 @@ function buildLevel(
 // words. Level 1 starts with the easiest first sounds and words.
 export const WORD_LEVELS: WordLevel[] = [
   buildLevel('level0', 'Level 0', 'Letters A to Z', 'imitateSound', [
-    ['a', 'A'], ['b', 'B'], ['c', 'C'], ['d', 'D'], ['e', 'E'], ['f', 'F'], ['g', 'G'],
-    ['h', 'H'], ['i', 'I'], ['j', 'J'], ['k', 'K'], ['l', 'L'], ['m', 'M'], ['n', 'N'],
-    ['o', 'O'], ['p', 'P'], ['q', 'Q'], ['r', 'R'], ['s', 'S'], ['t', 'T'], ['u', 'U'],
-    ['v', 'V'], ['w', 'W'], ['x', 'X'], ['y', 'Y'], ['z', 'Z'],
+    ['a', 'A', 'ay'], ['b', 'B', 'bee'], ['c', 'C', 'see'], ['d', 'D', 'dee'],
+    ['e', 'E', 'ee'], ['f', 'F', 'eff'], ['g', 'G', 'gee'], ['h', 'H', 'aitch'],
+    ['i', 'I', 'eye'], ['j', 'J', 'jay'], ['k', 'K', 'kay'], ['l', 'L', 'el'],
+    ['m', 'M', 'em'], ['n', 'N', 'en'], ['o', 'O', 'oh'], ['p', 'P', 'pee'],
+    ['q', 'Q', 'cue'], ['r', 'R', 'ar'], ['s', 'S', 'ess'], ['t', 'T', 'tee'],
+    ['u', 'U', 'you'], ['v', 'V', 'vee'], ['w', 'W', 'double you'], ['x', 'X', 'ex'],
+    ['y', 'Y', 'why'], ['z', 'Z', 'zee'],
   ]),
   buildLevel('level1', 'Level 1', 'First sounds and first words', 'imitateSound', [
     ['ma', '👩'], ['ba', '👄'], ['da', '👨'], ['pa', '👄'], ['hi', '👋'], ['bye', '👋'],
@@ -181,9 +189,11 @@ export const DEFAULT_SETTINGS: Settings = {
   devMode: false,
   soundEnabled: true,
   volume: 0.8,
-  // Default to the (now warm, auto-picked) system voice so there is no clip
-  // 404 round-trip before speaking; switch to 'recorded' once clips exist.
-  voiceMode: 'system',
+  // Default to the warm Kokoro voice served by the local /api/tts endpoint, so
+  // the voice is identical in every browser. Falls back to the system voice
+  // automatically if the server isn't running (e.g. a static deploy).
+  voiceMode: 'server',
+  serverVoice: 'af_bella',
   voiceName: null,
 }
 

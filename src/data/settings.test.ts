@@ -133,7 +133,7 @@ describe('settings', () => {
     expect(DEFAULT_SETTINGS.attentionThreshold).toBeGreaterThanOrEqual(60)
     expect(DEFAULT_SETTINGS.maxReprompts).toBeLessThanOrEqual(3)
     expect(DEFAULT_SETTINGS.endlessMode).toBe(true)
-    expect(DEFAULT_SETTINGS.voiceMode).toBe('system')
+    expect(DEFAULT_SETTINGS.voiceMode).toBe('server')
     // Starts at Level 1, leading with the easiest first sounds.
     expect(DEFAULT_SETTINGS.wordLevel).toBe('level1')
     expect(DEFAULT_SETTINGS.words[0].word).toBe('ma')

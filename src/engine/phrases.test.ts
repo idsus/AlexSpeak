@@ -6,6 +6,7 @@ import {
   promptText,
   modelText,
   listenCoachText,
+  elongate,
 } from './phrases'
 
 describe('phrase bank', () => {
@@ -28,26 +29,24 @@ describe('phrase bank', () => {
     expect(c.id).not.toBe(b.id)
   })
 
-  it('formats prompt and model text warmly', () => {
-    expect(promptText('Alex', 'apple')).toBe('Alex, can you say apple?')
-    expect(modelText('apple')).toBe('Apple. ... Apple.')
-    expect(modelText('apple', 1)).toBe('Try any little sound. Apple.')
-    expect(modelText('apple', 2)).toBe('One tiny sound is enough. Apple.')
+  it('elongate stretches the last vowel', () => {
+    expect(elongate('why')).toBe('whyyyyyyy')
+    expect(elongate('ma')).toBe('maaaaaaa')
+    expect(elongate('')).toBe('')
   })
 
-  it('formats shaping prompts by current rung', () => {
-    expect(promptText('Alex', 'apple', 'ah', 'anySound')).toBe(
-      'Alex, your turn. Any little sound.',
-    )
-    expect(promptText('Alex', 'apple', 'ah', 'imitateSound')).toBe(
-      'Alex, listen. ah. Your turn.',
-    )
-    expect(promptText('Alex', 'apple', 'ah', 'approximation')).toBe(
-      'Alex, try ah for apple.',
-    )
-    expect(modelText('apple', 0, 'ah', 'approximation')).toBe('Ah. ... Apple.')
-    expect(listenCoachText('Alex', 'apple', 'maa', 'imitateSound')).toBe(
-      'Alex, say maa. maa. Your turn.',
-    )
+  it('models just the sound — plain then stretched, no name or filler', () => {
+    // Uses the spoken sound, never the name; ends enthusiastically.
+    expect(promptText('Alex', 'ma')).toBe('Ma! Maaaaaaa!')
+    expect(promptText('Alex', 'y', 'why')).toBe('Why! Whyyyyyyy!')
+    expect(listenCoachText('Alex', 'ma')).toBe('Maaaaaaa!')
+    expect(modelText('ma', 0)).toBe('Ma! Maaaaaaa!')
+    expect(modelText('ma', 1)).toBe('Maaaaaaa! Maaaaaaa!')
+    // No leftover filler words anywhere.
+    for (const text of [promptText('A', 'ma'), modelText('ma', 1), listenCoachText('A', 'ma')]) {
+      expect(text.toLowerCase()).not.toContain('your turn')
+      expect(text.toLowerCase()).not.toContain('try')
+      expect(text).not.toContain('Alex')
+    }
   })
 })

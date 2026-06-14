@@ -46,70 +46,60 @@ export const SESSION_END_LINES: Phrase[] = [
   { id: 'end-02', text: 'That was so much fun! See you next time!' },
 ]
 
-export function promptText(
-  name: string,
-  word: string,
-  targetSound = word,
-  shapingLevel: ShapingLevel = 'word',
-): string {
-  if (shapingLevel === 'anySound') return `${name}, your turn. Any little sound.`
-  if (shapingLevel === 'imitateSound') return `${name}, listen. ${targetSound}. Your turn.`
-  if (shapingLevel === 'approximation') return `${name}, try ${targetSound} for ${word}.`
-  return `${name}, can you say ${word}?`
+function cap(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-// Slow, warm re-model of the word — deliberately not a question, just the
-// word offered twice with a pause.
+// Stretch the last vowel so the model sounds drawn-out and human, the way you
+// naturally over-pronounce for a child: "why" -> "whyyyyyyy", "ma" -> "maaaaaaa".
+export function elongate(sound: string): string {
+  const s = sound.trim()
+  if (!s) return s
+  const vowels = 'aeiouy'
+  let idx = -1
+  for (let i = s.length - 1; i >= 0; i -= 1) {
+    if (vowels.includes(s[i].toLowerCase())) {
+      idx = i
+      break
+    }
+  }
+  if (idx === -1) idx = s.length - 1
+  return s.slice(0, idx) + s[idx].repeat(7) + s.slice(idx + 1)
+}
+
+// All three coach lines below are deliberately just the SOUND — no name, no
+// "your turn", no "try a little". We model it enthusiastically: the plain sound,
+// then the same sound stretched out, so he hears exactly what to imitate.
+export function promptText(
+  _name: string,
+  word: string,
+  targetSound = word,
+  _shapingLevel: ShapingLevel = 'word',
+): string {
+  const sound = (targetSound || word).trim()
+  return `${cap(sound)}! ${cap(elongate(sound))}!`
+}
+
 export function modelText(
   word: string,
   repromptCount = 0,
   targetSound = word,
-  shapingLevel: ShapingLevel = 'word',
+  _shapingLevel: ShapingLevel = 'word',
 ): string {
-  const cap = word.charAt(0).toUpperCase() + word.slice(1)
-  const sound = targetSound.charAt(0).toUpperCase() + targetSound.slice(1)
-
-  if (shapingLevel === 'anySound') {
-    if (repromptCount >= 1) return 'Any sound is enough. Ah. Mmm. Uh.'
-    return 'My turn. Ah. ... Your turn.'
-  }
-
-  if (shapingLevel === 'imitateSound') {
-    if (repromptCount >= 2) return `One tiny ${targetSound} is enough. ${sound}.`
-    if (repromptCount === 1) return `Try a little ${targetSound}. ${sound}.`
-    return `${sound}. ... ${sound}.`
-  }
-
-  if (shapingLevel === 'approximation') {
-    if (repromptCount >= 2) return `Close is great. ${sound}.`
-    if (repromptCount === 1) return `Try the first sound. ${sound}.`
-    return `${sound}. ... ${cap}.`
-  }
-
-  if (repromptCount >= 2) return `One tiny sound is enough. ${cap}.`
-  if (repromptCount === 1) return `Try any little sound. ${cap}.`
-  return `${cap}. ... ${cap}.`
+  const sound = (targetSound || word).trim()
+  // Re-prompts lean fully into the stretched, sing-song version.
+  if (repromptCount >= 1) return `${cap(elongate(sound))}! ${cap(elongate(sound))}!`
+  return `${cap(sound)}! ${cap(elongate(sound))}!`
 }
 
 export function listenCoachText(
-  name: string,
+  _name: string,
   word: string,
   targetSound = word,
-  shapingLevel: ShapingLevel = 'word',
+  _shapingLevel: ShapingLevel = 'word',
 ): string {
-  if (shapingLevel === 'word') {
-    return `${name}, say ${word}. ${word}.`
-  }
-
-  if (shapingLevel === 'approximation') {
-    return `${name}, say ${targetSound}. ${targetSound}.`
-  }
-
-  if (shapingLevel === 'imitateSound') {
-    return `${name}, say ${targetSound}. ${targetSound}. Your turn.`
-  }
-
-  return `${name}, try a sound. ${targetSound}. ${targetSound}.`
+  const sound = (targetSound || word).trim()
+  return `${cap(elongate(sound))}!`
 }
 
 export function promptClipId(word: string): string {

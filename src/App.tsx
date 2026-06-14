@@ -43,7 +43,7 @@ import { getAllTargetImages } from './data/imageStore'
 import type { AudioEffortChannel, AudioEffortScore } from './audio/useAudioEffort'
 import type { PersonalizedSpeechModel, PersonalizedSpeechStatus } from './audio/personalizedSpeech'
 import { getCameraStream } from './audio/useMic'
-import { play, stopAllPlayback } from './audio/playClip'
+import { play, stopAllPlayback, prewarmServerVoice } from './audio/playClip'
 import type { MouthChannel, VisionScore } from './vision/useMouth'
 import PromptScreen from './ui/PromptScreen'
 import RewardScreen from './ui/RewardScreen'
@@ -116,6 +116,9 @@ export default function App() {
   const [targetImages, setTargetImages] = useState<Record<string, string>>({})
   // Zoom-style webcam preview visibility. Detection keeps running when hidden.
   const [showWebcam, setShowWebcam] = useState(true)
+  // Paused mid-session: freezes the loop, stops the voice, and pauses detectors
+  // until resumed (which re-enters the current step).
+  const [paused, setPaused] = useState(false)
   const sensorScoresRef = useRef<SensorScores>({
     audio: null,
     vision: null,
@@ -176,6 +179,7 @@ export default function App() {
     volume: settingsRef.current.volume,
     soundEnabled: settingsRef.current.soundEnabled,
     voiceMode: settingsRef.current.voiceMode,
+    serverVoice: settingsRef.current.serverVoice,
     voiceName: settingsRef.current.voiceName,
   })
 
@@ -435,6 +439,7 @@ export default function App() {
   async function startSession() {
     setView('session')
     setLoading(true)
+    setPaused(false)
     setChannelNotice(null)
     sensorScoresRef.current = { audio: null, vision: null }
     setSensorScores(sensorScoresRef.current)
@@ -442,6 +447,20 @@ export default function App() {
     lastAutoTargetSampleAtRef.current = 0
     lastAutoBackgroundSampleAtRef.current = 0
     sessionIdRef.current = `s-${Date.now()}`
+
+    // Warm the server voice for the first prompt + common praise so the first
+    // utterance isn't slow (fire-and-forget; no-op if the server isn't running).
+    if (settingsRef.current.voiceMode === 'server') {
+      const first = settingsRef.current.words[0]
+      const texts = first
+        ? [
+            promptText(settingsRef.current.childName, first.word, first.targetSound, first.shapingLevel),
+            listenCoachText(settingsRef.current.childName, first.word, first.targetSound, first.shapingLevel),
+            ...PRAISE_LINES.slice(0, 5).map((p) => p.text),
+          ]
+        : PRAISE_LINES.slice(0, 5).map((p) => p.text)
+      prewarmServerVoice(texts, settingsRef.current.serverVoice)
+    }
 
     // Claim this session. Any earlier session's detector callbacks (guarded by
     // isCurrent) stop firing immediately.
@@ -548,6 +567,7 @@ export default function App() {
     stopAllPlayback()
     setCoachSpeaking(false)
     setAssistCandidate(null)
+    setPaused(false)
     dispatch({ type: 'STOP' })
     teardownChannels()
     setView('home')
@@ -565,6 +585,7 @@ export default function App() {
       stopAllPlayback()
       setCoachSpeaking(false)
       setAssistCandidate(null)
+      setPaused(false)
       await teardownChannels()
       startSession()
     }
@@ -574,6 +595,17 @@ export default function App() {
   // (clips, timers, detector gating) lives here, keyed on phase re-entry.
   useEffect(() => {
     if (view !== 'session') return
+    // Paused: stop the voice and freeze detectors; the previous run's cleanup
+    // already cleared its timers. Resuming re-runs this effect, which re-enters
+    // the current step (re-plays the prompt / re-opens the listen window).
+    if (paused) {
+      stopAllPlayback()
+      setCoachSpeaking(false)
+      audioRef.current?.pause()
+      personalSpeechRef.current?.stop()
+      mouthRef.current?.setAttemptEnabled(false)
+      return
+    }
     let cancelled = false
     const state = engineState
     const words = settingsRef.current.words
@@ -760,7 +792,7 @@ export default function App() {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engineState.phase, engineState.trialIndex, engineState.repromptCount, view])
+  }, [engineState.phase, engineState.trialIndex, engineState.repromptCount, view, paused])
 
   const entry =
     settings.words[engineState.wordIndex % settings.words.length] ?? settings.words[0]
@@ -862,6 +894,28 @@ export default function App() {
           <button className="stop-btn" onClick={stopSession}>
             Stop
           </button>
+
+          {inTrial && !loading && !paused && (
+            <button className="pause-btn" onClick={() => setPaused(true)}>
+              ⏸ Pause
+            </button>
+          )}
+
+          {paused && (
+            <div className="pause-overlay" role="dialog" aria-label="Paused">
+              <div className="pause-card">
+                <div className="pause-icon" aria-hidden="true">⏸</div>
+                <div className="word">Paused</div>
+                <p className="subtitle">Take a break — pick up right where you left off.</p>
+                <button className="btn-primary" onClick={() => setPaused(false)}>
+                  ▶ Resume
+                </button>
+                <button className="btn-secondary" onClick={stopSession}>
+                  Stop session
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="level-switch" aria-label="Change practice level">
             {WORD_LEVELS.map((level) => (

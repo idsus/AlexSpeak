@@ -531,6 +531,47 @@ button:active {
   z-index: 20;
 }
 
+.pause-btn {
+  position: fixed;
+  left: 20px;
+  top: 74px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 999px;
+  box-shadow: 0 3px 8px rgba(74, 63, 53, 0.15);
+  z-index: 20;
+  cursor: pointer;
+}
+
+/* Pause takes over the screen calmly so nothing keeps moving while away. */
+.pause-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(247, 243, 235, 0.92);
+  backdrop-filter: blur(4px);
+}
+
+.pause-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 32px;
+}
+
+.pause-icon {
+  font-size: clamp(64px, 14vmin, 120px);
+  opacity: 0.8;
+}
+
 /* Celebration — gentle float-up stars, slow bounce. No flashing. */
 .celebrate-emoji {
   animation: joy 0.9s ease-in-out infinite alternate;

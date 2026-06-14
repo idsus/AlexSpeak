@@ -2,9 +2,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+// @ts-expect-error — local JS dev plugin (server-side Kokoro TTS endpoint)
+import { ttsServerPlugin } from './tools/ttsServerPlugin.mjs'
 
 export default defineConfig({
   plugins: [
+    ttsServerPlugin(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',

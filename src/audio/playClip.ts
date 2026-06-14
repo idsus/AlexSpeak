@@ -7,8 +7,10 @@
 export interface PlayOptions {
   volume: number
   soundEnabled: boolean
-  /** 'system' always uses the chosen browser voice; 'recorded' prefers /clips. */
-  voiceMode?: 'system' | 'recorded'
+  /** 'server' = warm Kokoro voice via /api/tts; 'system' = browser; 'recorded' = /clips first. */
+  voiceMode?: 'server' | 'system' | 'recorded'
+  /** Kokoro voice id for the server voice. */
+  serverVoice?: string
   voiceName: string | null
 }
 
@@ -171,32 +173,89 @@ async function speakFallback(text: string, options: PlayOptions): Promise<void> 
  * Resolves when playback has fully ended — the state machine uses this as
  * its PROMPT_ENDED / MODEL_ENDED signal, and audio attempt firing stays paused until then.
  */
+// --- Server voice (warm Kokoro via the local /api/tts endpoint) -------------
+// Synthesis runs on the dev server (Node), so the voice is identical in any
+// browser. Results are cached; if the endpoint is absent (e.g. a static build)
+// we mark it down and fall back to the browser voice for the rest of the session.
+const serverAudioCache = new Map<string, string>()
+let serverTtsDown = false
+
+async function synthesizeServer(text: string, voice: string): Promise<string | null> {
+  if (serverTtsDown) return null
+  const trimmed = text.trim()
+  if (!trimmed) return null
+  const key = `${voice}|${trimmed}`
+  const cached = serverAudioCache.get(key)
+  if (cached) return cached
+  try {
+    const res = await fetch(
+      `/api/tts?text=${encodeURIComponent(trimmed)}&voice=${encodeURIComponent(voice)}`,
+    )
+    if (!res.ok) {
+      // 404 / not found → no endpoint here; stop trying. 503 → transient, retry later.
+      if (res.status === 404) serverTtsDown = true
+      return null
+    }
+    const blob = await res.blob()
+    if (!blob.size || !blob.type.startsWith('audio')) return null
+    const url = URL.createObjectURL(blob)
+    serverAudioCache.set(key, url)
+    return url
+  } catch {
+    serverTtsDown = true // endpoint unreachable (no dev server)
+    return null
+  }
+}
+
+/** Warm the server cache for phrases that are about to be spoken. */
+export function prewarmServerVoice(texts: string[], voice: string): void {
+  if (serverTtsDown) return
+  for (const text of texts) void synthesizeServer(text, voice)
+}
+
+function playAudioElement(
+  audio: HTMLAudioElement,
+  volume: number,
+  onAutoplayFail?: () => Promise<void>,
+): Promise<void> {
+  return new Promise((resolve) => {
+    audio.volume = volume
+    audio.currentTime = 0
+    currentAudio = audio
+    audio.onended = () => {
+      if (currentAudio === audio) currentAudio = null
+      resolve()
+    }
+    audio.onerror = () => resolve()
+    audio.play().catch(() => {
+      if (onAutoplayFail) onAutoplayFail().then(resolve)
+      else resolve()
+    })
+  })
+}
+
 export async function play(id: string, text: string, options: PlayOptions): Promise<void> {
   if (!options.soundEnabled) {
     // Keep the visual pacing of the loop even with sound off.
     return new Promise((resolve) => setTimeout(resolve, Math.max(1600, text.length * 70)))
   }
 
-  // System voice mode skips the clip lookup entirely (no 404 round-trip).
-  if (options.voiceMode === 'system') return speakFallback(text, options)
+  const mode = options.voiceMode ?? 'server'
 
-  const clip = await loadClip(id)
-  if (!clip) return speakFallback(text, options)
+  // Recorded mode prefers a pre-rendered clip if one exists.
+  if (mode === 'recorded') {
+    const clip = await loadClip(id)
+    if (clip) return playAudioElement(clip, options.volume, () => speakFallback(text, options))
+  }
 
-  return new Promise((resolve) => {
-    clip.volume = options.volume
-    clip.currentTime = 0
-    currentAudio = clip
-    clip.onended = () => {
-      if (currentAudio === clip) currentAudio = null
-      resolve()
-    }
-    clip.onerror = () => resolve()
-    clip.play().catch(() => {
-      // Autoplay rejection or decode failure — fall back to TTS.
-      speakFallback(text, options).then(resolve)
-    })
-  })
+  // Server (Kokoro) voice — the default, and the recorded fallback before Web Speech.
+  if (mode === 'server' || mode === 'recorded') {
+    const url = await synthesizeServer(text, options.serverVoice ?? 'af_bella')
+    if (url) return playAudioElement(new Audio(url), options.volume)
+  }
+
+  // Universal fallback: the browser's Web Speech voice.
+  return speakFallback(text, options)
 }
 
 export function listSystemVoices(): SpeechSynthesisVoice[] {
