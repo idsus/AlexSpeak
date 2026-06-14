@@ -37,6 +37,32 @@ export interface PersonalizedSpeechOptions {
   onStatus?: (status: PersonalizedSpeechStatus) => void
 }
 
+// Local copy of the BROWSER_FFT base model (fetched by tools/fetch_models.mjs)
+// so the recording/personalization works fully offline. Falls back to tfjs's
+// default online base model only if the local files are missing.
+const LOCAL_BASE_MODEL = '/models/speech-commands/model.json'
+const LOCAL_BASE_METADATA = '/models/speech-commands/metadata.json'
+
+async function createBaseRecognizer(): Promise<BaseRecognizer> {
+  try {
+    const head = await fetch(LOCAL_BASE_MODEL, { method: 'HEAD' })
+    if (head.ok) {
+      // speech-commands rejects root-relative paths for the metadata URL — it
+      // requires an absolute http(s) URL. Resolve against the page origin.
+      const origin = window.location.origin
+      return speechCommands.create(
+        'BROWSER_FFT',
+        undefined,
+        new URL(LOCAL_BASE_MODEL, origin).href,
+        new URL(LOCAL_BASE_METADATA, origin).href,
+      )
+    }
+  } catch {
+    // No local model bundled — fall through to the online default.
+  }
+  return speechCommands.create('BROWSER_FFT')
+}
+
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer)
   let binary = ''
@@ -171,7 +197,7 @@ export class PersonalizedSpeechModel {
   }
 
   private async init(): Promise<void> {
-    this.base = speechCommands.create('BROWSER_FFT')
+    this.base = await createBaseRecognizer()
     await this.base.ensureModelLoaded()
     this.transfer = this.base.createTransfer(MODEL_NAME)
     this.loadPersistedExamples()
