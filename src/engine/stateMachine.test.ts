@@ -124,6 +124,21 @@ describe('state machine', () => {
     expect(s.trialIndex).toBe(2)
   })
 
+  it('endless mode never reaches sessionEnd — it just keeps cycling words', () => {
+    const endlessConfig: SessionConfig = { ...config, endless: true }
+    let state = reduce(createInitialState(), endlessConfig, { type: 'START_SESSION' })
+    // Far more trials than trialsPerSession (3) — should never end.
+    for (let i = 0; i < 12; i += 1) {
+      state = reduce(state, endlessConfig, { type: 'ATTEMPT', channel: 'manual' })
+      state = reduce(state, endlessConfig, { type: 'CELEBRATE_DONE' })
+      expect(state.phase).not.toBe('sessionEnd')
+    }
+    expect(state.phase).toBe('prompt')
+    expect(state.successCount).toBe(12)
+    // Words wrap around the 2-word list endlessly.
+    expect(state.wordIndex).toBe(12 % config.words.length)
+  })
+
   it('the session ends after trialsPerSession trials', () => {
     const s = run(
       createInitialState(),

@@ -1,7 +1,7 @@
 // Mic capture with the browser's audio "cleanup" disabled. Noise suppression
 // is trained to delete exactly the quiet, non-speech-like vocalizations we
 // want to catch, so it must stay off. Echo cancellation is unnecessary
-// because the VAD is paused while the app speaks (gating).
+// because audio attempt firing is paused while the app speaks (gating).
 export async function getMicStream(): Promise<MediaStream> {
   return navigator.mediaDevices.getUserMedia({
     audio: {

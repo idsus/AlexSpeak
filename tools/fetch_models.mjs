@@ -3,8 +3,6 @@
 //
 //   node tools/fetch_models.mjs
 //
-// - Silero VAD onnx + audio worklet  ← node_modules/@ricky0123/vad-web
-// - ONNX Runtime Web wasm            ← node_modules/onnxruntime-web
 // - MediaPipe vision wasm            ← node_modules/@mediapipe/tasks-vision
 // - face_landmarker.task             ← downloaded once from Google storage
 //                                      (the only network access, build-time only)
@@ -15,22 +13,11 @@ import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const nm = join(root, 'node_modules')
-const vadDir = join(root, 'public', 'models', 'vad')
 const mpDir = join(root, 'public', 'models', 'mediapipe')
 
-mkdirSync(vadDir, { recursive: true })
 mkdirSync(join(mpDir, 'wasm'), { recursive: true })
 
 const copies = [
-  // Silero VAD models + worklet
-  ['@ricky0123/vad-web/dist/silero_vad_v5.onnx', join(vadDir, 'silero_vad_v5.onnx')],
-  ['@ricky0123/vad-web/dist/silero_vad_legacy.onnx', join(vadDir, 'silero_vad_legacy.onnx')],
-  [
-    '@ricky0123/vad-web/dist/vad.worklet.bundle.min.js',
-    join(vadDir, 'vad.worklet.bundle.min.js'),
-  ],
-  // (ONNX Runtime wasm is NOT copied here — src/audio/useVAD.ts imports it
-  // with ?url so Vite bundles it; public-dir copies would 500 in dev.)
   // MediaPipe vision wasm runtime
   [
     '@mediapipe/tasks-vision/wasm/vision_wasm_internal.js',

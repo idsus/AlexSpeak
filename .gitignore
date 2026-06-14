@@ -28,3 +28,7 @@ public/models/
 
 # Smoke-test screenshots
 tools/smoke-*.png
+
+# Nested working copies / scratch (not part of this project)
+CODE_AlexSpeak-main/
+.supertonic-ref/

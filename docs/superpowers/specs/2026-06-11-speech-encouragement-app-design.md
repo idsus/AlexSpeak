@@ -26,20 +26,20 @@ Not "say the word correctly → pass/fail." Speech recognition can't reliably he
 | Layer | Choice |
 |---|---|
 | App shell | React + Vite, installable PWA (`vite-plugin-pwa`) |
-| Listening (VAD) | Silero VAD via `@ricky0123/vad-web`, hot thresholds, gated around playback |
-| Mouth movement | MediaPipe Face Landmarker (`@mediapipe/tasks-vision`), blendshape `jawOpen` |
+| Listening | Browser Web Audio vocal-effort score, hot threshold, gated around playback |
+| Mouth + attention | MediaPipe Face Landmarker (`@mediapipe/tasks-vision`), mouth score + face attention score |
 | Manual override | Big always-visible "I saw it!" caregiver button |
 | Voice (TTS) | Pre-rendered clips from `tools/generate_clips.py` (Kokoro/ElevenLabs at build time); **runtime fallback: Web Speech API** so the app works before clips exist |
 | Logic / praise | Plain React + a pure TypeScript state machine + hand-written phrase bank |
 | Data | Local-only session log in `localStorage`, JSON export |
 
-**Build-time vs runtime split:** Python lives at the workbench (clip generation, later personal-model training). The browser runs the app. Models (Silero ONNX, ORT wasm, MediaPipe wasm + `face_landmarker.task`) are copied/downloaded into `public/models/` by `tools/fetch_models.mjs` so everything serves locally and works offline.
+**Build-time vs runtime split:** Python lives at the workbench (clip generation, later personal-model training). The browser runs the app. MediaPipe wasm + `face_landmarker.task` are copied/downloaded into `public/models/` by `tools/fetch_models.mjs` so everything serves locally and works offline.
 
 ## Interaction loop (state machine)
 
 ```
-IDLE → PROMPT (play "[name], can you say apple?" + show image; VAD paused during playback)
-     → LISTEN (~6 s window; VAD + jawOpen + caregiver button all armed)
+IDLE → PROMPT (play "[name], can you say apple?" + show image; audio attempt firing paused during playback)
+     → LISTEN (~6 s window; vocal score + mouth score + caregiver button all armed)
          ├─ any channel fires → CELEBRATE (praise clip + animation) → next trial
          └─ window expires → MODEL (re-say word slowly, warmly — never "you failed") → LISTEN
               after maxReprompts → ENCOURAGE (warm, no-pressure close of the trial) → next trial
@@ -54,11 +54,11 @@ Implementation decisions beyond the original plan:
 
 ## Audio capture
 
-`getUserMedia` with `noiseSuppression: false`, `echoCancellation: false`, `autoGainControl: false`, mono 16 kHz — browser "cleanup" deletes exactly the quiet sounds we want. VAD is paused while any clip plays (gating instead of echo cancellation). Hot tuning: `positiveSpeechThreshold ≈ 0.3` (caregiver slider), `minSpeechFrames: 2`.
+`getUserMedia` with `noiseSuppression: false`, `echoCancellation: false`, `autoGainControl: false`, mono 16 kHz — browser "cleanup" deletes exactly the quiet sounds we want. The live detector scores vocal effort from room-noise-adjusted energy plus voice-band match, spectral peakiness, and vowel-like zero-crossing rate, so repeated quiet sounds like "ah ah ah" can count without requiring word recognition. A caregiver-selectable Alex voice range and noise-filter threshold keep fans, taps, and broad room noise from firing the detector. Attempt firing is paused while any clip plays (gating instead of echo cancellation).
 
 ## Caregiver settings (persisted locally)
 
-Name, target words (+ emoji), listen-window length, max re-prompts, trials per session, audio sensitivity, mouth sensitivity, camera channel on/off, sound on/off, voice choice (clips vs system voices).
+Name, target words (+ emoji), listen-window length, max re-prompts, trials per session, vocal-effort threshold, Alex voice range, noise-filter strength, mouth threshold, webcam attention threshold, camera channel on/off, sound on/off, voice choice (clips vs system voices).
 
 ## Data & progress
 
@@ -67,7 +67,7 @@ Per trial: timestamp, word, channel fired, latency to first attempt, re-prompt c
 ## Build phases
 
 - **Phase 0** — scaffold, PWA, permission flow, clip-generation script. ✅
-- **Phase 1** — MVP loop: voice + gated VAD + caregiver button + state machine + reward screen. ✅
+- **Phase 1** — MVP loop: voice + gated audio detector + caregiver button + state machine + reward screen. ✅
 - **Phase 2** — vision channel (jawOpen). ✅
 - **Phase 3** — caregiver settings, logging, progress view. ✅
 - **Phase 3.5** — researcher-style audio capture & review (designed below). Next.
@@ -83,11 +83,10 @@ Phase 5 has a real training set.
 
 ### Capture: peri-event clips, not continuous recording
 
-- During LISTEN, keep a **rolling ring buffer** (~5 s) of raw 16 kHz mic audio. The
-  vad-web `onFrameProcessed` callback already delivers every frame, so this costs
-  almost nothing.
+- During LISTEN, keep a **rolling ring buffer** (~5 s) of mic audio from the Web
+  Audio graph that already powers the vocal-effort score.
 - When **any** channel fires (audio, mouth, manual), persist a window around the
-  attempt: ~3 s before through ~2 s after. This captures the sound even when the VAD
+  attempt: ~3 s before through ~2 s after. This captures the sound even when audio
   was not the channel that detected it — silent mouthing with a faint sound, a
   caregiver tap on something the detectors missed. Those near-misses are exactly the
   audio worth studying (and the evidence for re-tuning sensitivity).
@@ -134,8 +133,8 @@ trial id.
    their own voice — likely more salient than any TTS. The Phase 3.5 recording
    infrastructure doubles as the recorder; clips drop into `public/clips/`-equivalent
    IndexedDB slots that playClip checks first.
-2. **Live calibration meter.** A settings screen showing real-time VAD probability and
-   jawOpen score so the caregiver can watch what registers and tune by observation;
+2. **Live calibration meter.** A settings screen showing real-time vocal-effort and
+   mouth scores so the caregiver can watch what registers and tune by observation;
    a 10-second room-noise sample suggests a starting audio threshold.
 3. **Reactive listening ring.** Make the breathing ring respond instantly to his sound
    level during LISTEN — immediate cause-and-effect even before the celebration.

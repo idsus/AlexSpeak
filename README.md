@@ -14,8 +14,9 @@ reward any vocal attempt first. The detectors answer "did an attempt happen," ne
 ```
 PROMPT  →  "Alex, can you say apple?"  + big picture     (mic detector paused)
 LISTEN  →  ~6 s window, three channels armed at once:
-             🔊 Silero VAD (quiet sounds, tuned hot)
-             👄 MediaPipe jawOpen (silent mouthing)
+             🔊 live vocal-effort score (quiet "ah" sounds, tuned hot)
+             👄 MediaPipe mouth-movement score (silent mouthing)
+             👀 MediaPipe attention score (face present, centered, visible)
              👀 caregiver "I saw it!" button
    any channel fires → CELEBRATE  (praise + gentle stars) → next word
    window expires    → MODEL      (re-say the word warmly) → listen again
@@ -28,7 +29,7 @@ Everything runs in the browser. **No audio or video ever leaves the device.**
 
 ```bash
 npm install
-npm run fetch-models   # copies VAD/MediaPipe assets into public/models (one-time)
+npm run fetch-models   # copies MediaPipe assets into public/models (one-time)
 npm run dev            # open the printed URL, allow mic (and camera)
 ```
 
@@ -54,9 +55,12 @@ offline use on the next build). Re-run after changing the name or word list.
 ## Caregiver settings (⚙️ in the app)
 
 Name used in prompts · target words + pictures · listen-window length · number of
-gentle re-prompts · words per session · sound & mouth sensitivity (when unsure, more
-sensitive is better — a false "I heard you!" costs nothing, a missed attempt hurts) ·
-camera channel on/off · volume · fallback voice.
+gentle re-prompts · words per session · vocal-effort, Alex voice range, noise-filter,
+mouth, and attention thresholds · camera channel on/off · volume · fallback voice.
+
+For audio tuning, start stricter: keep **Noise filter strength** around 65–75%, pick the
+closest **Alex voice range**, then lower **Vocal effort trigger** only if his real “ah”
+sounds are not scoring.
 
 ## Progress (📈 in the app)
 
@@ -68,8 +72,8 @@ speech-language pathologist.
 
 ```
 src/engine/    pure state machine, detection fusion, phrase bank  (unit tested)
-src/audio/     mic capture (browser cleanup disabled), Silero VAD, clip playback
-src/vision/    MediaPipe Face Landmarker → jawOpen channel
+src/audio/     mic capture, live vocal-effort scoring, clip playback
+src/vision/    MediaPipe Face Landmarker → mouth + attention scoring
 src/ui/        prompt / reward / settings / progress screens
 src/data/      settings + local-only session log                  (unit tested)
 tools/         build-time only: clip generation (Python), model fetching (Node)

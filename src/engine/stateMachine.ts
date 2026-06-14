@@ -17,6 +17,8 @@ export interface SessionConfig {
   words: string[]
   maxReprompts: number
   trialsPerSession: number
+  /** When true the session never auto-ends — it cycles the word list until Stop. */
+  endless?: boolean
 }
 
 export interface EngineState {
@@ -52,7 +54,8 @@ export function createInitialState(): EngineState {
 
 function nextTrial(state: EngineState, config: SessionConfig): EngineState {
   const trialIndex = state.trialIndex + 1
-  if (trialIndex >= config.trialsPerSession) {
+  // Endless mode goes on and on — only the Stop button ends it.
+  if (!config.endless && trialIndex >= config.trialsPerSession) {
     return { ...state, phase: 'sessionEnd', trialIndex }
   }
   return {

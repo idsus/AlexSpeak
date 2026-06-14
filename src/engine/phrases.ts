@@ -2,6 +2,8 @@
 // tools/generate_clips.py renders one audio file per id, and playClip falls
 // back to the Web Speech API with the same text when a clip is missing.
 
+import type { ShapingLevel } from '../data/settings'
+
 export interface Phrase {
   id: string
   text: string
@@ -44,15 +46,70 @@ export const SESSION_END_LINES: Phrase[] = [
   { id: 'end-02', text: 'That was so much fun! See you next time!' },
 ]
 
-export function promptText(name: string, word: string): string {
+export function promptText(
+  name: string,
+  word: string,
+  targetSound = word,
+  shapingLevel: ShapingLevel = 'word',
+): string {
+  if (shapingLevel === 'anySound') return `${name}, your turn. Any little sound.`
+  if (shapingLevel === 'imitateSound') return `${name}, listen. ${targetSound}. Your turn.`
+  if (shapingLevel === 'approximation') return `${name}, try ${targetSound} for ${word}.`
   return `${name}, can you say ${word}?`
 }
 
 // Slow, warm re-model of the word — deliberately not a question, just the
 // word offered twice with a pause.
-export function modelText(word: string): string {
+export function modelText(
+  word: string,
+  repromptCount = 0,
+  targetSound = word,
+  shapingLevel: ShapingLevel = 'word',
+): string {
   const cap = word.charAt(0).toUpperCase() + word.slice(1)
+  const sound = targetSound.charAt(0).toUpperCase() + targetSound.slice(1)
+
+  if (shapingLevel === 'anySound') {
+    if (repromptCount >= 1) return 'Any sound is enough. Ah. Mmm. Uh.'
+    return 'My turn. Ah. ... Your turn.'
+  }
+
+  if (shapingLevel === 'imitateSound') {
+    if (repromptCount >= 2) return `One tiny ${targetSound} is enough. ${sound}.`
+    if (repromptCount === 1) return `Try a little ${targetSound}. ${sound}.`
+    return `${sound}. ... ${sound}.`
+  }
+
+  if (shapingLevel === 'approximation') {
+    if (repromptCount >= 2) return `Close is great. ${sound}.`
+    if (repromptCount === 1) return `Try the first sound. ${sound}.`
+    return `${sound}. ... ${cap}.`
+  }
+
+  if (repromptCount >= 2) return `One tiny sound is enough. ${cap}.`
+  if (repromptCount === 1) return `Try any little sound. ${cap}.`
   return `${cap}. ... ${cap}.`
+}
+
+export function listenCoachText(
+  name: string,
+  word: string,
+  targetSound = word,
+  shapingLevel: ShapingLevel = 'word',
+): string {
+  if (shapingLevel === 'word') {
+    return `${name}, say ${word}. ${word}.`
+  }
+
+  if (shapingLevel === 'approximation') {
+    return `${name}, say ${targetSound}. ${targetSound}.`
+  }
+
+  if (shapingLevel === 'imitateSound') {
+    return `${name}, say ${targetSound}. ${targetSound}. Your turn.`
+  }
+
+  return `${name}, try a sound. ${targetSound}. ${targetSound}.`
 }
 
 export function promptClipId(word: string): string {
@@ -61,6 +118,10 @@ export function promptClipId(word: string): string {
 
 export function modelClipId(word: string): string {
   return `model-${word.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+}
+
+export function coachClipId(word: string): string {
+  return `coach-${word.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
 }
 
 // Returns a picker that never hands out the same phrase twice in a row.

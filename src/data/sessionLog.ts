@@ -1,5 +1,6 @@
 import type { Channel } from '../engine/stateMachine'
 import type { StorageLike } from './memoryStorage'
+import type { ShapingLevel } from './settings'
 
 // Local-only progress log. Nothing here ever leaves the device; the export
 // button hands the caregiver a JSON file they can choose to share with an SLP.
@@ -8,6 +9,9 @@ export interface TrialRecord {
   timestamp: number
   sessionId: string
   word: string
+  targetSound?: string
+  shapingLevel?: ShapingLevel
+  reward?: string
   /** Which channel registered the attempt; null when the trial timed out. */
   channel: Channel | null
   /** Time from listen-window open to first attempt; null on timeout. */

@@ -3,13 +3,15 @@ import { useMemo } from 'react'
 interface Props {
   praiseText: string
   emoji: string
+  reward: string
+  imageUrl?: string
 }
 
 const STARS = ['⭐', '🌟', '✨', '💛', '🎈']
 
 // Gentle celebration: slow rising stars and a softly bouncing emoji.
 // Deliberately no flashing or rapid motion — sensory safety first.
-export default function RewardScreen({ praiseText, emoji }: Props) {
+export default function RewardScreen({ praiseText, emoji, reward, imageUrl }: Props) {
   const stars = useMemo(
     () =>
       Array.from({ length: 12 }, (_, i) => ({
@@ -29,8 +31,13 @@ export default function RewardScreen({ praiseText, emoji }: Props) {
           </span>
         ))}
       </div>
-      <div className="big-emoji celebrate-emoji">{emoji}</div>
+      {imageUrl ? (
+        <img className="reward-photo celebrate-emoji" src={imageUrl} alt="" />
+      ) : (
+        <div className="big-emoji celebrate-emoji">{emoji}</div>
+      )}
       <div className="word">{praiseText}</div>
+      {reward && <div className="reward-cue">Now: {reward}</div>}
     </div>
   )
 }

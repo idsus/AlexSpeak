@@ -5,9 +5,9 @@ interface Props {
 }
 
 const CHANNEL_LABELS: Record<string, string> = {
-  audio: '🔊 sound',
-  mouth: '👄 mouth',
-  manual: '👀 caregiver',
+  audio: 'voice',
+  mouth: 'mouth',
+  manual: 'caregiver',
 }
 
 export default function Progress({ onClose }: Props) {
@@ -27,7 +27,7 @@ export default function Progress({ onClose }: Props) {
     <div className="screen">
       <div className="panel">
         <h2>Progress</h2>
-        <p className="hint" style={{ color: 'var(--ink-soft)', fontSize: 14 }}>
+        <p className="panel-note">
           Everything is stored on this device only. Use export to share a summary with an SLP.
         </p>
 
@@ -41,7 +41,7 @@ export default function Progress({ onClose }: Props) {
               {s.meanLatencyMs !== null &&
                 ` · responded in ~${(s.meanLatencyMs / 1000).toFixed(1)} s`}
             </div>
-            <div style={{ color: 'var(--ink-soft)', fontSize: 14 }}>
+            <div className="session-meta">
               {Object.entries(s.channels)
                 .map(([ch, n]) => `${CHANNEL_LABELS[ch] ?? ch} ×${n}`)
                 .join(' · ')}
@@ -49,9 +49,9 @@ export default function Progress({ onClose }: Props) {
           </div>
         ))}
 
-        <div className="field-row" style={{ marginTop: 16 }}>
+        <div className="field-row panel-actions">
           <button className="btn-secondary" onClick={download} disabled={summaries.length === 0}>
-            ⬇️ Export for SLP
+            Export for SLP
           </button>
           <button className="btn-secondary" onClick={onClose}>
             Back
