@@ -6,7 +6,6 @@ import {
   promptText,
   modelText,
   listenCoachText,
-  elongate,
 } from './phrases'
 
 describe('phrase bank', () => {
@@ -29,24 +28,21 @@ describe('phrase bank', () => {
     expect(c.id).not.toBe(b.id)
   })
 
-  it('elongate stretches the last vowel', () => {
-    expect(elongate('why')).toBe('whyyyyyyy')
-    expect(elongate('ma')).toBe('maaaaaaa')
-    expect(elongate('')).toBe('')
-  })
-
-  it('models just the sound — plain then stretched, no name or filler', () => {
-    // Uses the spoken sound, never the name; ends enthusiastically.
-    expect(promptText('Alex', 'ma')).toBe('Ma! Maaaaaaa!')
-    expect(promptText('Alex', 'y', 'why')).toBe('Why! Whyyyyyyy!')
-    expect(listenCoachText('Alex', 'ma')).toBe('Maaaaaaa!')
-    expect(modelText('ma', 0)).toBe('Ma! Maaaaaaa!')
-    expect(modelText('ma', 1)).toBe('Maaaaaaa! Maaaaaaa!')
-    // No leftover filler words anywhere.
-    for (const text of [promptText('A', 'ma'), modelText('ma', 1), listenCoachText('A', 'ma')]) {
+  it('always says "<name>, say <sound>!" then the sound, no other filler', () => {
+    expect(promptText('Alex', 'ma')).toBe('Alex, say ma! Ma!')
+    expect(promptText('Alex', 'y', 'why')).toBe('Alex, say why! Why!')
+    expect(listenCoachText('Alex', 'ma')).toBe('Alex, say ma!')
+    expect(modelText('Alex', 'ma', 0)).toBe('Alex, say ma! Ma!')
+    expect(modelText('Alex', 'ma', 1)).toBe('Alex, say ma! Ma! Ma!')
+    // No leftover filler.
+    for (const text of [promptText('Alex', 'ma'), modelText('Alex', 'ma', 1), listenCoachText('Alex', 'ma')]) {
+      expect(text).toContain('Alex, say')
       expect(text.toLowerCase()).not.toContain('your turn')
       expect(text.toLowerCase()).not.toContain('try')
-      expect(text).not.toContain('Alex')
     }
+  })
+
+  it('falls back to "Say <sound>!" when no name is set', () => {
+    expect(promptText('', 'ma')).toBe('Say ma! Ma!')
   })
 })

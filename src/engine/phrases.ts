@@ -50,56 +50,46 @@ function cap(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-// Stretch the last vowel so the model sounds drawn-out and human, the way you
-// naturally over-pronounce for a child: "why" -> "whyyyyyyy", "ma" -> "maaaaaaa".
-export function elongate(sound: string): string {
-  const s = sound.trim()
-  if (!s) return s
-  const vowels = 'aeiouy'
-  let idx = -1
-  for (let i = s.length - 1; i >= 0; i -= 1) {
-    if (vowels.includes(s[i].toLowerCase())) {
-      idx = i
-      break
-    }
-  }
-  if (idx === -1) idx = s.length - 1
-  return s.slice(0, idx) + s[idx].repeat(7) + s.slice(idx + 1)
+// Every coach line is "<name>, say <sound>!" plus the sound said clearly once
+// more — no other filler. (We avoid stretching it with repeated letters like
+// "beeee": the neural voice renders that as a stutter "be-be-be" rather than a
+// held sound, so we say it as clean words instead.)
+function lead(name: string): string {
+  const n = name.trim()
+  return n ? `${n}, say ` : 'Say '
 }
 
-// All three coach lines below are deliberately just the SOUND — no name, no
-// "your turn", no "try a little". We model it enthusiastically: the plain sound,
-// then the same sound stretched out, so he hears exactly what to imitate.
 export function promptText(
-  _name: string,
+  name: string,
   word: string,
   targetSound = word,
   _shapingLevel: ShapingLevel = 'word',
 ): string {
   const sound = (targetSound || word).trim()
-  return `${cap(sound)}! ${cap(elongate(sound))}!`
+  return `${lead(name)}${sound}! ${cap(sound)}!`
 }
 
 export function modelText(
+  name: string,
   word: string,
   repromptCount = 0,
   targetSound = word,
   _shapingLevel: ShapingLevel = 'word',
 ): string {
   const sound = (targetSound || word).trim()
-  // Re-prompts lean fully into the stretched, sing-song version.
-  if (repromptCount >= 1) return `${cap(elongate(sound))}! ${cap(elongate(sound))}!`
-  return `${cap(sound)}! ${cap(elongate(sound))}!`
+  // Re-prompts say the sound once more for emphasis.
+  if (repromptCount >= 1) return `${lead(name)}${sound}! ${cap(sound)}! ${cap(sound)}!`
+  return `${lead(name)}${sound}! ${cap(sound)}!`
 }
 
 export function listenCoachText(
-  _name: string,
+  name: string,
   word: string,
   targetSound = word,
   _shapingLevel: ShapingLevel = 'word',
 ): string {
   const sound = (targetSound || word).trim()
-  return `${cap(elongate(sound))}!`
+  return `${lead(name)}${sound}!`
 }
 
 export function promptClipId(word: string): string {

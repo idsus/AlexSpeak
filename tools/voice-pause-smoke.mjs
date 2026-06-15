@@ -19,7 +19,8 @@ await page.waitForSelector('.coach-bubble', { timeout: 25000 })
 await page.waitForTimeout(1500)
 const coach = (await page.locator('.coach-bubble').first().innerText()).trim()
 console.log('coach line:', JSON.stringify(coach))
-if (/your turn|try a|listen|alex,/i.test(coach)) fail(`coach line still has filler: ${coach}`)
+if (/your turn|try a|, listen/i.test(coach)) fail(`coach line still has filler: ${coach}`)
+if (!/say /i.test(coach)) fail(`coach line should say "<name>, say <word>": ${coach}`)
 if (!coach.includes('!')) fail('coach line is not enthusiastic (no "!")')
 
 // Server voice should have been requested.

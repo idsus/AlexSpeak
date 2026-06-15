@@ -455,10 +455,9 @@ export default function App() {
       const texts = first
         ? [
             promptText(settingsRef.current.childName, first.word, first.targetSound, first.shapingLevel),
-            listenCoachText(settingsRef.current.childName, first.word, first.targetSound, first.shapingLevel),
-            ...PRAISE_LINES.slice(0, 5).map((p) => p.text),
+            ...PRAISE_LINES.slice(0, 2).map((p) => p.text),
           ]
-        : PRAISE_LINES.slice(0, 5).map((p) => p.text)
+        : PRAISE_LINES.slice(0, 2).map((p) => p.text)
       prewarmServerVoice(texts, settingsRef.current.serverVoice)
     }
 
@@ -705,7 +704,13 @@ export default function App() {
       }
 
       case 'model': {
-        const text = modelText(entry.word, state.repromptCount, entry.targetSound, entry.shapingLevel)
+        const text = modelText(
+          settingsRef.current.childName,
+          entry.word,
+          state.repromptCount,
+          entry.targetSound,
+          entry.shapingLevel,
+        )
         setCoachLine(text)
         setCoachSpeaking(true)
         play(
