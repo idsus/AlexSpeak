@@ -11,8 +11,8 @@
     calc(48px + env(safe-area-inset-left, 0px));
   gap: 20px;
 }
-.home-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.home-hello { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.home-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+.home-hello { flex: 1 1 200px; display: flex; align-items: center; gap: 18px; min-width: 0; }
 .home-pip { flex: none; }
 .home-name { overflow-wrap: anywhere; }
 .home-jar {
@@ -28,17 +28,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 300px;
-  height: 300px;
+  /* min(): landscape phones are short */
+  width: min(300px, 38dvh);
+  height: min(300px, 38dvh);
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--hue-song);
-  box-shadow: 0 10px 0 var(--hue-song-deep), 0 0 0 22px rgba(43, 182, 115, 0.12);
-  transition: transform var(--dur-press) var(--ease-out), box-shadow var(--dur-press) var(--ease-out);
+  /* same rule as .chunky: deep fill so the white triangle clears 3:1, darker edge under it */
+  background: var(--hue-song-deep);
+  box-shadow: 0 10px 0 color-mix(in srgb, var(--hue-song-deep) 70%, #000);
+  transition: transform var(--dur-press) var(--ease-out);
 }
-.home-play svg { width: 124px; height: 124px; }
-.home-play:active { transform: translateY(6px); box-shadow: 0 4px 0 var(--hue-song-deep), 0 0 0 22px rgba(43, 182, 115, 0.12); }
+.home-play svg { width: 41%; height: 41%; }
+.home-play:active { transform: translateY(6px); box-shadow: 0 4px 0 color-mix(in srgb, var(--hue-song-deep) 70%, #000); }
+.home-play:focus-visible { outline-offset: 28px; }
 
 .home-tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
 .home-tile { flex: 0 0 calc((100% - 5 * 20px) / 6); min-width: 0; }
@@ -60,9 +63,11 @@
   transition: transform var(--dur-press) var(--ease-out);
 }
 .home-lock:active { transform: scale(0.94); }
+/* the hold ring (ui.css) shows the 1.5 s long-press filling; the lock sits in its middle */
+.home-lock-icon { position: absolute; inset: 9px; }
 
 /* Phone portrait (PhoneHome artboard): 3-column tiles, smaller Play. */
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .home {
     padding:
       calc(24px + env(safe-area-inset-top, 0px))
@@ -77,8 +82,7 @@
   .home-stars { gap: 6px; }
   .home-stars svg { width: 20px; height: 20px; }
   .home-play-wrap { min-height: 240px; }
-  .home-play { width: 220px; height: 220px; box-shadow: 0 10px 0 var(--hue-song-deep), 0 0 0 18px rgba(43, 182, 115, 0.12); }
-  .home-play svg { width: 92px; height: 92px; }
+  .home-play { width: min(220px, 38dvh); height: min(220px, 38dvh); }
   .home-tiles { gap: 12px; }
   .home-tile { flex-basis: calc((100% - 2 * 12px) / 3); padding: 16px 8px; gap: 8px; border-radius: 22px; font-size: 0.9375rem; }
   .home-tile-art { width: 44px; height: 44px; }

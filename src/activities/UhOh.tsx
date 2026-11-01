@@ -7,9 +7,11 @@ type Scene = 'tower' | 'bubbles' | 'car'
 const SCENES: Scene[] = ['tower', 'bubbles', 'car']
 const UH_OH: Target = { id: 'uh-oh', shown: 'uh-oh!', spoken: 'uh oh' }
 const TAP_LABEL: Record<Scene, string> = { tower: 'tap to add a block', bubbles: 'tap to blow a bubble', car: 'tap to make the car go' }
-const HINT: Record<Scene, string> = { tower: '5 taps, then it falls', bubbles: 'tap to blow, tap to pop', car: 'tap to go' }
+const HINT: Record<Scene, string> = { tower: '4 taps, then it falls', bubbles: 'tap to blow, tap to pop', car: 'tap to go' }
 const BLOCKS = 5
-const DRIVE_MS = 600
+// the tower starts with one block so the card is never empty
+const firstStep = (s: Scene) => (s === 'tower' ? 1 : 0)
+const DRIVE_MS = 300 // matches --dur-move
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 // standing tower, bottom block first; FALL is where each lands when it tumbles
@@ -25,7 +27,7 @@ const FALL = [
 /** Three tiny cause-and-effect scenes; each ends in a surprise and an "uh-oh!". */
 export function UhOh({ api, onDone }: ActivityProps) {
   const [sceneIdx, setSceneIdx] = useState(0)
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(firstStep(SCENES[0]))
   const [event, setEvent] = useState(false) // fell / popped / crashed
   const busy = useRef(false)
   const scene = SCENES[sceneIdx]
@@ -34,8 +36,9 @@ export function UhOh({ api, onDone }: ActivityProps) {
     busy.current = true
     setEvent(true)
     await api.runTrial(UH_OH)
-    setSceneIdx((i) => (i + 1) % SCENES.length)
-    setStep(0)
+    const next = (sceneIdx + 1) % SCENES.length
+    setSceneIdx(next)
+    setStep(firstStep(SCENES[next]))
     setEvent(false)
     busy.current = false
     onDone()
@@ -68,6 +71,12 @@ export function UhOh({ api, onDone }: ActivityProps) {
         <svg width="420" height="520" viewBox="0 0 420 520" aria-hidden="true">
           {scene === 'tower' && (<>
             <rect x="40" y="470" width="340" height="14" rx="7" fill="var(--line)" />
+            {!event && step < BLOCKS && (
+              <rect
+                x={TOWER[step].x} y={TOWER[step].y} width={TOWER[step].w} height="84" rx="16"
+                fill="none" stroke="var(--h)" strokeWidth="4" strokeDasharray="12 10" opacity="0.4"
+              />
+            )}
             {TOWER.map((b, i) => (
               <rect
                 key={i}
@@ -87,7 +96,7 @@ export function UhOh({ api, onDone }: ActivityProps) {
             <path d="M80 428 L40 488" stroke="var(--h-deep)" strokeWidth="12" strokeLinecap="round" />
             <g className={step === 0 ? 'uhoh-part uhoh-bubble--hidden' : event ? 'uhoh-part uhoh-bubble--popped' : 'uhoh-part'}>
               <circle cx="240" cy="200" r="100" fill="var(--h-tint)" stroke="var(--h)" strokeWidth="6" />
-              <path d="M190 150 a60 60 0 0 1 40 -26" stroke="#FFFFFF" strokeWidth="12" fill="none" strokeLinecap="round" />
+              <path d="M190 150 a60 60 0 0 1 40 -26" stroke="var(--surface)" strokeWidth="12" fill="none" strokeLinecap="round" />
             </g>
             <g className={event ? 'uhoh-burst uhoh-burst--on' : 'uhoh-burst'} stroke="var(--h-deep)" strokeWidth="6" strokeLinecap="round">
               <path d="M240 70 v30" /><path d="M240 300 v30" /><path d="M110 200 h30" /><path d="M340 200 h30" />
@@ -104,9 +113,9 @@ export function UhOh({ api, onDone }: ActivityProps) {
             <g className={event ? 'uhoh-part uhoh-car--crash' : step === 1 ? 'uhoh-part uhoh-car--go' : 'uhoh-part'}>
               <rect x="30" y="330" width="150" height="56" rx="18" fill="var(--h)" />
               <rect x="60" y="302" width="90" height="44" rx="14" fill="var(--h)" />
-              <rect x="74" y="310" width="30" height="26" rx="6" fill="#FFFFFF" />
+              <rect x="74" y="310" width="30" height="26" rx="6" fill="var(--surface)" />
               <circle cx="66" cy="390" r="18" fill="var(--ink)" /><circle cx="146" cy="390" r="18" fill="var(--ink)" />
-              <circle cx="66" cy="390" r="7" fill="#FFFFFF" /><circle cx="146" cy="390" r="7" fill="#FFFFFF" />
+              <circle cx="66" cy="390" r="7" fill="var(--surface)" /><circle cx="146" cy="390" r="7" fill="var(--surface)" />
             </g>
             <g className={event ? 'uhoh-burst uhoh-burst--on' : 'uhoh-burst'} stroke="var(--h-deep)" strokeWidth="5" fill="none" strokeLinecap="round">
               <path d="M330 280 q-14 -10 -24 2" /><path d="M326 250 q-22 -14 -36 4" />

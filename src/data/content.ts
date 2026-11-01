@@ -74,7 +74,7 @@ export const ACTIVITIES: {
   },
   {
     id: 'choose', label: 'Choose', hue: 'choose', sample: 'bubbles',
-    tip: 'Hold both real things up. Give {name} whichever one he touches, right away. A touch is talking.',
+    tip: 'Hold both real things up. Give {name} whichever one {name} touches, right away. A touch is talking.',
     celebrateTip: 'Give the {thing} now. Name it as you hand it over.',
     why: 'Making a choice is a powerful way to communicate without words. Touching a picture counts, and getting the chosen thing right away shows that choices matter. Over time the touch can be joined by a sound or a word.',
   },
@@ -110,13 +110,13 @@ export const ACTIVITIES: {
   },
   {
     id: 'count', label: 'Count the dots', hue: 'copy', sample: 'three',
-    tip: '{name} taps each dot; the app counts with him. On the last one it stops — "one, two, ___" — and waits. Any sound = "{word}!"',
+    tip: '{name} taps each dot; the app counts along. On the last one it stops — "one, two, ___" — and waits. Any sound = "{word}!"',
     celebrateTip: 'Say "{word}!" together and count the dots once more.',
     why: 'Counting is a routine children know by heart, which makes the last number easy to predict. Stopping just before it invites your child to fill the gap. Tapping each dot keeps hands and attention together.',
   },
   {
     id: 'find', label: 'Find it', hue: 'song', sample: 'dog',
-    tip: 'The app says "touch the {word}". Any touch is fine — the one he picks gets named big. No wrong answers, only words.',
+    tip: 'The app says "touch the {word}". Any touch is fine — the one {name} picks gets named big. Any touch is a good answer.',
     celebrateTip: 'Name it again: "{word}!" Point to a real one if you have it.',
     why: 'Hearing a word and touching a picture builds understanding of words. Whatever your child touches is named and celebrated, so there is nothing to get wrong. Understanding words comes before saying them.',
   },

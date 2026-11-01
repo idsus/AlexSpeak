@@ -54,9 +54,9 @@ export function Song({ api, photos, onDone }: ActivityProps) {
           <g className={api.celebrating ? 'song-car song-car--go' : 'song-car'}>
             <rect x="60" y="96" width="150" height="56" rx="18" fill="var(--h)" />
             <rect x="90" y="68" width="90" height="44" rx="14" fill="var(--h)" />
-            <rect x="104" y="76" width="30" height="26" rx="6" fill="#FFFFFF" />
+            <rect x="104" y="76" width="30" height="26" rx="6" fill="var(--surface)" />
             <circle cx="96" cy="156" r="18" fill="var(--ink)" /><circle cx="176" cy="156" r="18" fill="var(--ink)" />
-            <circle cx="96" cy="156" r="7" fill="#FFFFFF" /><circle cx="176" cy="156" r="7" fill="#FFFFFF" />
+            <circle cx="96" cy="156" r="7" fill="var(--surface)" /><circle cx="176" cy="156" r="7" fill="var(--surface)" />
           </g>
         </svg>
       )}

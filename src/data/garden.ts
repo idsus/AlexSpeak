@@ -1,11 +1,10 @@
-import type { StorageLike } from './memoryStorage'
+import { safeStorage, type StorageLike } from './memoryStorage'
 
 export interface Garden { stars: number; flowers: number } // stars 0..4
 
 const KEY = 'alexspeak.v2.garden'
-const browserStorage = (): StorageLike => globalThis.localStorage
 
-export function loadGarden(storage: StorageLike = browserStorage()): Garden {
+export function loadGarden(storage: StorageLike = safeStorage()): Garden {
   try {
     const g = JSON.parse(storage.getItem(KEY) ?? 'null')
     if (g && Number.isFinite(g.stars) && Number.isFinite(g.flowers)) return { stars: g.stars % 5, flowers: g.flowers }
@@ -16,7 +15,7 @@ export function loadGarden(storage: StorageLike = browserStorage()): Garden {
 }
 
 /** Stars are never removed: the fifth empties the jar into a new flower. */
-export function addStar(storage: StorageLike = browserStorage()): { garden: Garden; grew: boolean } {
+export function addStar(storage: StorageLike = safeStorage()): { garden: Garden; grew: boolean } {
   const g = loadGarden(storage)
   const grew = g.stars + 1 >= 5
   const garden = grew ? { stars: 0, flowers: g.flowers + 1 } : { stars: g.stars + 1, flowers: g.flowers }

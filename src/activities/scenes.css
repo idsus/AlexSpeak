@@ -28,11 +28,7 @@
   pointer-events: none;
   transition: opacity var(--dur-ui) var(--ease-out);
 }
-.sc-ring--on::before { opacity: 0.85; animation: sc-breathe 4s var(--ease-in-out) infinite; }
-@keyframes sc-breathe {
-  0%, 100% { transform: scale(1); opacity: 0.85; }
-  50% { transform: scale(0.96); opacity: 0.6; }
-}
+.sc-ring--on::before { opacity: 0.85; animation: breathe 4s var(--ease-in-out) infinite alternate; } /* keyframes in ui.css */
 
 .sc-disc {
   display: flex;
@@ -44,8 +40,8 @@
   border: 1.5px solid var(--line);
 }
 
-.sc-word { font-size: clamp(4rem, 14vw, 10rem); font-weight: 900; line-height: 1; letter-spacing: -0.02em; padding-bottom: 0.08em; margin: 0; color: var(--ink); }
-.sc-hint { margin: 0; font-size: 18px; font-weight: 700; color: var(--ink-3); }
+.sc-word { font-size: clamp(4rem, 14vw, 10rem); font-weight: 900; line-height: 1; letter-spacing: -0.02em; padding-bottom: 0.08em; margin: 0; color: var(--ink); overflow-wrap: anywhere; text-wrap: balance; }
+.sc-hint { margin: 0; font-size: 18px; font-weight: 700; color: var(--ink-3-text); }
 
 /* Parent chips, bottom-left, clear of Pip in the middle. */
 .sc-chips {
@@ -60,7 +56,7 @@
 }
 .sc-chips .small-caps { font-size: 14px; margin-right: 6px; }
 .sc-chip { min-height: 36px; height: 36px; padding: 0 14px; font-size: 15px; font-weight: 700; color: var(--ink-2); }
-.sc-chip.chip--on { color: var(--surface); }
+.sc-chip.chip--on { color: var(--h-ink); }
 .sc-chips .sc-hint { flex-basis: 100%; font-size: 15px; color: var(--h-ink); }
 
 /* ---- Copy me ---- */
@@ -78,7 +74,7 @@
 .song-blank > span { color: var(--h); opacity: 0.28; transition: opacity var(--dur-ui) var(--ease-out); }
 .song-blank--done > span { opacity: 1; }
 .song-art { width: min(520px, 100%); height: auto; }
-.song-car { transition: transform 600ms var(--ease-out); }
+.song-car { transition: transform var(--dur-move) var(--ease-out); }
 .song-car--go { transform: translateX(240px); }
 
 /* ---- Uh-oh ---- */
@@ -101,20 +97,20 @@
 .uhoh-bar { width: 220px; height: 7px; border-radius: 999px; background: var(--h); opacity: 0.3; transition: opacity var(--dur-ui) var(--ease-out); }
 .uhoh-bar--on { opacity: 0.85; }
 /* SVG parts move around their own centre */
-.uhoh-part { transform-box: fill-box; transform-origin: center; transition: transform 600ms var(--ease-out), opacity var(--dur-ui) var(--ease-out); }
+.uhoh-part { transform-box: fill-box; transform-origin: center; transition: transform var(--dur-move) var(--ease-out), opacity var(--dur-ui) var(--ease-out); }
 .uhoh-part--hidden { opacity: 0; transform: translateY(-16px); }
-.uhoh-bubble--hidden { opacity: 0; transform: translate(-120px, 160px) scale(0.3); }
-.uhoh-bubble--popped { opacity: 0; transform: scale(1.12); }
+.uhoh-bubble--hidden { opacity: 0; transform: scale(0.95); }
+.uhoh-bubble--popped { opacity: 0; transform: scale(1); }
 .uhoh-car--go { transform: translateX(166px); }
-.uhoh-car--crash { transform: translateX(160px) rotate(-6deg); }
+.uhoh-car--crash { transform: translateX(160px) rotate(-2deg); }
 .uhoh-burst { opacity: 0; transition: opacity var(--dur-ui) var(--ease-out); }
 .uhoh-burst--on { opacity: 0.6; }
 
 /* ---- Memory match ---- */
 .mm-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; width: min(600px, 100%); }
-.mm-card { height: clamp(120px, 21vh, 170px); padding: 0; border: 0; background: none; perspective: 900px; }
-.mm-inner { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform var(--dur-ui) var(--ease-out); }
-.mm-card--up .mm-inner { transform: rotateY(180deg); }
+.mm-card { height: clamp(120px, 21vh, 170px); padding: 0; border: 0; background: none; }
+/* the two faces crossfade; no 3D flip */
+.mm-inner { position: relative; display: block; width: 100%; height: 100%; }
 .mm-face {
   position: absolute;
   inset: 0;
@@ -122,11 +118,12 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  transition: opacity var(--dur-ui) var(--ease-out);
 }
 .mm-back { background: var(--h); box-shadow: 0 6px 0 var(--h-deep); }
-.mm-front { background: var(--surface); box-shadow: 0 0 0 5px var(--h); transform: rotateY(180deg); }
+.mm-front { background: var(--surface); box-shadow: 0 0 0 5px var(--h); opacity: 0; }
+.mm-card--up .mm-back { opacity: 0; }
+.mm-card--up .mm-front { opacity: 1; }
 .mm-front > svg, .mm-front > img { width: 65%; height: auto; max-height: 75%; }
 .mm-side { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 220px; }
 .mm-ring { width: 200px; height: 200px; }
@@ -140,19 +137,21 @@
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: var(--surface);
-  box-shadow: inset 0 0 0 5px var(--h);
-  color: var(--h);
-  font-size: calc(var(--dot, 170px) * 0.42);
+  /* filled copy-violet disc with its deep edge (canvas); the number appears once counted.
+     White 900 on #7C5CE6 is 4.6:1. */
+  background: var(--h);
+  box-shadow: 0 6px 0 var(--h-deep);
+  color: var(--surface);
+  font-size: calc(var(--dot, 170px) * 0.424); /* 72 px at 170 */
   font-weight: 900;
   line-height: 1;
   transition: transform var(--dur-press) var(--ease-out);
 }
 .count-dot:active { transform: scale(0.96); }
-.count-dot--on { background: var(--h); box-shadow: 0 8px 0 var(--h-deep); color: var(--surface); }
+/* the last one waits: white disc, 7 px hue ring, "?" in the hue */
 .count-dot--gap { background: var(--surface); box-shadow: 0 0 0 7px var(--h); color: var(--h); }
 .count-side { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 240px; }
-.count-lead { display: flex; flex-wrap: wrap; gap: 0 18px; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; color: var(--ink-3); }
+.count-lead { display: flex; flex-wrap: wrap; gap: 0 18px; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; color: var(--ink-3-text); }
 .count-word { font-size: clamp(4rem, 14vw, 10.625rem); }
 
 /* ---- Find it ---- */
@@ -171,7 +170,7 @@
   border: 1.5px solid var(--line);
   border-radius: var(--radius-xl);
   background: var(--surface);
-  transition: transform var(--dur-press) var(--ease-out), box-shadow var(--dur-ui) var(--ease-out);
+  transition: transform var(--dur-press) var(--ease-out);
 }
 .find-card:active { transform: scale(0.97); }
 .find-card--picked { border-color: transparent; box-shadow: 0 0 0 7px var(--h); }

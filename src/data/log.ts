@@ -1,4 +1,4 @@
-import type { StorageLike } from './memoryStorage'
+import { safeStorage, type StorageLike } from './memoryStorage'
 import { ACTIVITIES, type ActivityId } from './content'
 
 export type Channel = 'sound' | 'touch' | 'parent'
@@ -15,18 +15,19 @@ export const RUNGS: Rung[] = ['looked', 'reached', 'sound', 'close', 'word']
 
 const KEY = 'alexspeak.v2.log'
 const WEEK = 7 * 24 * 60 * 60 * 1000
-const browserStorage = (): StorageLike => globalThis.localStorage
+const validTime = (t: unknown): t is number => typeof t === 'number' && Math.abs(t) <= 8.64e15
 
-export function loadLog(storage: StorageLike = browserStorage()): LogRecord[] {
+export function loadLog(storage: StorageLike = safeStorage()): LogRecord[] {
   try {
     const parsed: unknown = JSON.parse(storage.getItem(KEY) ?? '[]')
-    return Array.isArray(parsed) ? (parsed as LogRecord[]) : []
+    // drop nulls and records whose time would make Date throw (NaN, beyond ±8.64e15)
+    return Array.isArray(parsed) ? (parsed as LogRecord[]).filter((r) => r && validTime(r.t)) : []
   } catch {
     return []
   }
 }
 
-export function appendRecord(r: LogRecord, storage: StorageLike = browserStorage()): void {
+export function appendRecord(r: LogRecord, storage: StorageLike = safeStorage()): void {
   const log = loadLog(storage)
   log.push(r)
   try {
@@ -84,7 +85,7 @@ export function wordRungCount(log: LogRecord[], target: string, rung: Rung): num
 }
 
 const label = (id: ActivityId) => ACTIVITIES.find((a) => a.id === id)?.label ?? id
-const day = (t: number) => new Date(t).toISOString().slice(0, 10)
+const day = (t: number) => (validTime(t) ? new Date(t).toISOString().slice(0, 10) : '?')
 
 /** One plain-text page for a speech-language pathologist. */
 export function slpSummary(log: LogRecord[], childName: string, now: number = Date.now()): string {
@@ -107,7 +108,7 @@ export function slpSummary(log: LogRecord[], childName: string, now: number = Da
     '',
     'LAST 20 ATTEMPTS (date, activity, target, prompts before response, response)',
     ...log
-      .filter((r): r is Attempt => r.kind === 'attempt')
+      .filter((r): r is Attempt => r.kind === 'attempt' && validTime(r.t) && r.t <= now)
       .slice(-20)
       .reverse()
       .map((a) => `- ${day(a.t)}, ${label(a.activity)}, ${a.target}, ${a.prompts}, ${a.rung ?? a.channel}`),

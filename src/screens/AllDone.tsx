@@ -18,7 +18,8 @@ export function sessionSentence(name: string, records: LogRecord[], ms: number):
   const reached = attempts.filter((a) => a.rung === 'reached').length
   const did = [sounds && `made ${plural(sounds, 'sound', 'sounds')}`, reached && `reached ${plural(reached, 'time', 'times')}`].filter(Boolean)
   const tail = did.length ? `${name} ${did.join(' and ')}` : `${name} played with you`
-  return `${plural(Math.max(1, Math.round(ms / 60000)), 'minute', 'minutes')} · ${plural(attempts.length, 'try', 'tries')} · ${tail}`
+  const mins = plural(Math.max(1, Math.round(ms / 60000)), 'minute', 'minutes')
+  return [mins, attempts.length > 0 && plural(attempts.length, 'try', 'tries'), tail].filter(Boolean).join(' · ')
 }
 
 function GardenArt({ flowers, grew, name }: { flowers: number; grew: boolean; name: string }) {
@@ -31,7 +32,7 @@ function GardenArt({ flowers, grew, name }: { flowers: number; grew: boolean; na
       {Array.from({ length: shown }, (_, i) => {
         const x = 10 + step * (i + 1)
         const top = 250 - HEIGHTS[i % HEIGHTS.length]
-        const r = shown > 4 ? 26 : 36
+        const r = shown > 4 ? 22 : 36 // 7 flowers at 26 overlap
         return (
           <g key={i}>
             <path d={`M${x} 250V${top}`} stroke="var(--hue-song)" strokeWidth="8" strokeLinecap="round" />
@@ -52,8 +53,8 @@ function GardenArt({ flowers, grew, name }: { flowers: number; grew: boolean; na
 
 export function AllDone(props: { childName: string; garden: Garden; grew: boolean; since: number; ms: number; onHome: () => void }) {
   const { childName, garden, grew, since } = props
-  // Read after mount: the activity flushes its last record while unmounting.
-  const [records, setRecords] = useState<LogRecord[]>([])
+  // Read now so it never flashes empty, and again after mount: the activity flushes its last record while unmounting.
+  const [records, setRecords] = useState<LogRecord[]>(() => loadLog().filter((r) => r.t >= since))
   useEffect(() => setRecords(loadLog().filter((r) => r.t >= since)), [since])
   return (
     <div className="alldone hue-song">
@@ -69,7 +70,7 @@ export function AllDone(props: { childName: string; garden: Garden; grew: boolea
         </div>
       )}
       <button type="button" className="chunky alldone-home" onClick={props.onHome}>
-        <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" fill="#FFFFFF" /></svg>
+        <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" fill="var(--surface)" /></svg>
         Home
       </button>
       <p className="alldone-sentence">{sessionSentence(childName, records, props.ms)}</p>

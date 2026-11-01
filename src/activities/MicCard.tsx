@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { displayName } from '../data/settings'
 
 /** The only permission moment: one plain sentence over the activity, never a wall. */
 export function MicCard(props: { childName: string; onYes: () => void; onNo: () => void }) {
@@ -13,7 +14,7 @@ export function MicCard(props: { childName: string; onYes: () => void; onNo: () 
             <path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" stroke="var(--h-deep)" strokeWidth="2" fill="none" strokeLinecap="round" />
           </svg>
         </div>
-        <h2 id="mic-title">Can AlexSpeak listen for {props.childName}'s sounds?</h2>
+        <h2 id="mic-title">Can AlexSpeak listen for {displayName(props.childName)}'s sounds?</h2>
       </div>
       <p id="mic-body">
         It only notices that a sound happened so it can celebrate. Nothing is recorded, and nothing leaves this

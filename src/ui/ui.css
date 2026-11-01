@@ -1,6 +1,6 @@
 /* Shared child-screen pieces: Pip, hold button, listen disc, stars, photos. */
 
-.pip-face { transition: opacity 200ms var(--ease-out); }
+.pip-face { transition: opacity var(--dur-ui) var(--ease-out); }
 
 .stars { display: flex; align-items: center; gap: 10px; }
 
@@ -42,7 +42,7 @@
   border: 4px solid transparent;
   transform: rotate(-45deg);
   /* release: snap back fast */
-  transition: transform 160ms var(--ease-out);
+  transition: transform var(--dur-release) var(--ease-out);
 }
 .hold-half--r .hold-arc { left: -20px; border-top-color: var(--hold-hue); border-left-color: var(--hold-hue); }
 .hold-half--l .hold-arc { left: 0; border-bottom-color: var(--hold-hue); border-right-color: var(--hold-hue); }
@@ -51,6 +51,18 @@
 .hold--on .hold-half--r .hold-arc { transition: transform calc(var(--hold) / 2) linear; }
 .hold--on .hold-half--l .hold-arc { transition: transform calc(var(--hold) / 2) linear calc(var(--hold) / 2); }
 .hold-check { position: absolute; inset: 0; }
+/* Calm / reduced motion: no fill transition, so the ring fills in thirds (HoldButton ticks
+   hold--s0..s2 every hold/3). s0 = a third the moment the press lands. */
+html[data-calm="true"] .hold--s0 .hold-half--r .hold-arc { transform: rotate(75deg); }
+html[data-calm="true"] .hold--s1 .hold-half--r .hold-arc { transform: rotate(135deg); }
+html[data-calm="true"] .hold--s1 .hold-half--l .hold-arc { transform: rotate(15deg); }
+html[data-calm="true"] .hold--s2 .hold-arc { transform: rotate(135deg); }
+@media (prefers-reduced-motion: reduce) {
+  .hold--s0 .hold-half--r .hold-arc { transform: rotate(75deg); }
+  .hold--s1 .hold-half--r .hold-arc { transform: rotate(135deg); }
+  .hold--s1 .hold-half--l .hold-arc { transform: rotate(15deg); }
+  .hold--s2 .hold-arc { transform: rotate(135deg); }
+}
 
 /* ---- Listen disc ---- */
 .listen {
@@ -70,7 +82,7 @@
   opacity: 0.25;
   transition: opacity var(--dur-ui) var(--ease-out);
 }
-.listen--on .listen-ring { opacity: 0.85; animation: listen-breathe 4s var(--ease-in-out) infinite alternate; }
+.listen--on .listen-ring { opacity: 0.85; animation: breathe 4s var(--ease-in-out) infinite alternate; }
 .listen-disc {
   width: 85.7%;
   aspect-ratio: 1;
@@ -83,7 +95,8 @@
   overflow: hidden;
 }
 .listen-disc > svg, .listen-disc > img { width: 66%; height: 66%; }
-@keyframes listen-breathe {
-  from { transform: scale(1); opacity: 1; }
+/* The one looping motion DESIGN.md allows: every listen ring breathes with this, 4 s alternate. */
+@keyframes breathe {
+  from { transform: scale(1); opacity: 0.85; }
   to { transform: scale(0.96); opacity: 0.6; }
 }

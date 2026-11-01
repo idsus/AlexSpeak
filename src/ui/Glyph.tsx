@@ -13,19 +13,22 @@ const ART: Record<GlyphId | CoreGlyphId, Art> = {
     <circle cx="92" cy="130" r="64" fill={T} stroke={H} strokeWidth="6" />
     <circle cx="170" cy="76" r="40" fill={T} stroke={H} strokeWidth="6" />
     <circle cx="176" cy="160" r="24" fill={T} stroke={H} strokeWidth="6" />
-    <circle cx="66" cy="104" r="12" fill="#FFFFFF" /><circle cx="156" cy="60" r="8" fill="#FFFFFF" />
+    <circle cx="66" cy="104" r="12" fill="var(--surface)" /><circle cx="156" cy="60" r="8" fill="var(--surface)" />
   </>) },
   sock: { box: 240, draw: ({ H, T }) => (<>
     <path d="M86 40h64v80l34 44a36 36 0 0 1-50 50l-54-42z" fill={T} stroke={H} strokeWidth="6" strokeLinejoin="round" />
     <rect x="80" y="30" width="76" height="26" rx="8" fill={H} />
   </>) },
-  snack: { box: 24, draw: ({ H }) => (<>
-    <path d="M4 10h16v3a8 8 0 0 1-16 0z" fill={H} />
-    <path d="M6 10V8a6 6 0 0 1 12 0v2" stroke={H} strokeWidth="2.5" fill="none" />
+  // a bowl with three round pieces on top
+  snack: { box: 24, draw: ({ H, T }) => (<>
+    <circle cx="8" cy="10" r="3" fill={T} stroke={H} strokeWidth="1.8" />
+    <circle cx="16" cy="10" r="3" fill={T} stroke={H} strokeWidth="1.8" />
+    <circle cx="12" cy="8" r="3" fill={T} stroke={H} strokeWidth="1.8" />
+    <path d="M2.5 12h19a9.5 8 0 0 1-19 0z" fill={H} />
   </>) },
   car: { box: 24, draw: ({ H }) => (<>
     <path d="M3 12l4-5h10l4 5v5H3z" fill={H} />
-    <rect x="8" y="8.5" width="4" height="3" rx="1" fill="#FFFFFF" />
+    <rect x="8" y="8.5" width="4" height="3" rx="1" fill="var(--surface)" />
     <circle cx="7.5" cy="17.5" r="2.5" fill={INK} /><circle cx="16.5" cy="17.5" r="2.5" fill={INK} />
   </>) },
   tickle: { box: 24, draw: ({ H }) => (
@@ -89,7 +92,7 @@ const ART: Record<GlyphId | CoreGlyphId, Art> = {
 
 /** hue: an activity hue id ('ask', 'choose'…) or any CSS colour. */
 function paint(hue: string): Paint {
-  if (/^(#|var\(|rgb)/.test(hue)) return { H: hue, T: '#FFFFFF' }
+  if (/^(#|var\(|rgb)/.test(hue)) return { H: hue, T: 'var(--surface)' }
   return { H: `var(--hue-${hue})`, T: `var(--hue-${hue}-tint)` }
 }
 

@@ -1,4 +1,4 @@
-import type { StorageLike } from './memoryStorage'
+import { safeStorage, type StorageLike } from './memoryStorage'
 import { DEFAULT_MOTIVATORS, NEUTRAL_ITEMS, type Motivator } from './content'
 
 export type MicLevel = 'quiet' | 'normal' | 'loud'
@@ -39,7 +39,6 @@ export const DEFAULT_SETTINGS: Settings = {
 
 const KEY = 'alexspeak.v2.settings'
 const LEGACY_KEY = 'alexspeak.settings'
-const browserStorage = (): StorageLike => globalThis.localStorage
 
 function readJson(storage: StorageLike, key: string): Record<string, unknown> | null {
   try {
@@ -51,11 +50,11 @@ function readJson(storage: StorageLike, key: string): Record<string, unknown> | 
   }
 }
 
-export function loadSettings(storage: StorageLike = browserStorage()): Settings {
+export function loadSettings(storage: StorageLike = safeStorage()): Settings {
   const stored = readJson(storage, KEY) ?? {}
   const s: Settings = { ...DEFAULT_SETTINGS, ...stored, version: 2 }
   if (!Array.isArray(s.motivatorIds)) s.motivatorIds = DEFAULT_SETTINGS.motivatorIds
-  if (!Array.isArray(s.customMotivators)) s.customMotivators = []
+  s.customMotivators = Array.isArray(s.customMotivators) ? s.customMotivators.filter((m) => typeof m?.id === 'string') : []
   if (typeof s.childName !== 'string') s.childName = DEFAULT_SETTINGS.childName
 
   if (!s.importedLegacy) {
@@ -68,7 +67,7 @@ export function loadSettings(storage: StorageLike = browserStorage()): Settings 
   return s
 }
 
-export function saveSettings(s: Settings, storage: StorageLike = browserStorage()): void {
+export function saveSettings(s: Settings, storage: StorageLike = safeStorage()): void {
   try {
     storage.setItem(KEY, JSON.stringify(s))
   } catch {
@@ -105,3 +104,6 @@ export function importLegacyPhotos(s: Settings, photoKeys: string[]): Settings {
     motivatorIds: [...s.motivatorIds, ...fresh.map((x) => x.id)],
   }
 }
+
+/** The child's name for display; whitespace-only falls back to "your child". */
+export const displayName = (s: string) => s.trim() || 'your child'

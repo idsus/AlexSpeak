@@ -61,4 +61,28 @@ describe('log', () => {
     expect(text).toContain('Alex')
     expect(text).toContain('bubbles')
   })
+
+  it('drops null and out-of-range records so summaries never throw', () => {
+    const storage = new MemoryStorage()
+    const ok = { kind: 'attempt', t: NOW - DAY, activity: 'ask', target: 'car', channel: 'sound', prompts: 0 }
+    storage.setItem('alexspeak.v2.log', JSON.stringify([null, { ...ok, t: 'x' }, { ...ok, t: 1e20 }, ok, { ...ok, t: NOW + DAY, target: 'future' }]))
+    const log = loadLog(storage)
+    expect(log).toHaveLength(2)
+    expect(weekSummary(log, NOW).attempts).toBe(1)
+    const text = slpSummary(log, 'Alex', NOW)
+    expect(text).toContain('car')
+    expect(text).not.toContain('future')
+  })
+
+  it('keeps logging when localStorage is blocked', () => {
+    const desc = Object.getOwnPropertyDescriptor(globalThis, 'localStorage')
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('SecurityError') } })
+    try {
+      expect(() => appendRecord({ kind: 'session', t: NOW, ms: 1 })).not.toThrow()
+      expect(loadLog()).toHaveLength(1)
+    } finally {
+      if (desc) Object.defineProperty(globalThis, 'localStorage', desc)
+      else delete (globalThis as { localStorage?: unknown }).localStorage
+    }
+  })
 })

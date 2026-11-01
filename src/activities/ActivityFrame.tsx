@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
 import { activityInfo, fillTip, type ActivityId, type Target } from '../data/content'
-import { activeMotivators, type Settings } from '../data/settings'
+import { activeMotivators, displayName, type Settings } from '../data/settings'
 import { appendRecord, type LogRecord, type Rung } from '../data/log'
 import { ENCOURAGE_LINES, makePicker } from '../engine/phrases'
 import { speak, stopSpeaking } from '../audio/voice'
@@ -170,7 +170,7 @@ export function ActivityFrame(props: {
   const shown = celebrating ?? target
   const thing = shown ? (activeMotivators(settings).find((m) => m.id === shown.id)?.shown ?? shown.shown) : info.sample
   const tip = fillTip(celebrating ? info.celebrateTip : info.tip, {
-    name: settings.childName,
+    name: displayName(settings.childName),
     thing,
     word: shown?.shown ?? info.sample,
   })
@@ -201,13 +201,14 @@ export function ActivityFrame(props: {
 
       <Pip
         mood={pipMood}
+        size={celebrating ? 170 : undefined}
         waves={listening && attempt.micState === 'on'}
-        className={`frame-pip ${PIP_CENTRE.includes(activity) ? 'frame-pip--centre' : ''}`}
+        className={`frame-pip ${PIP_CENTRE.includes(activity) ? 'frame-pip--centre' : ''} ${celebrating ? 'frame-pip--celebrate' : ''}`}
       />
       {!celebrating && (
         <HoldButton label="I saw it" hue={info.hue} className="frame-hold" onHold={() => runner.attempt('parent')} />
       )}
-      {chips && <RungChips selected={chips.rung} leaving={chips.leaving} childName={settings.childName} onPick={pickRung} />}
+      {chips && <RungChips selected={chips.rung} leaving={chips.leaving} childName={displayName(settings.childName)} onPick={pickRung} />}
       {asking && <MicCard childName={settings.childName} onYes={() => answer(true)} onNo={() => answer(false)} />}
     </div>
   )

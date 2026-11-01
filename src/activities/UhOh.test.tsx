@@ -15,10 +15,11 @@ const api: FrameApi = {
 const props = { api, settings: DEFAULT_SETTINGS, photos: {}, onDone: () => {} }
 
 describe('UhOh', () => {
-  it('starts on the tower with nothing stacked', () => {
+  it('starts on the tower with one block and a dashed outline for the next', () => {
     const out = renderToStaticMarkup(<UhOh {...props} />)
     expect(out).toContain('tap to add a block')
-    expect(out.match(/uhoh-part--hidden/g)).toHaveLength(5)
+    expect(out.match(/uhoh-part--hidden/g)).toHaveLength(4)
+    expect(out).toContain('stroke-dasharray="12 10"')
     expect(out).toContain('uh-oh!')
   })
 })

@@ -29,4 +29,16 @@ describe('Progress', () => {
     expect(html).toContain('9 flowers grown')
     expect(html).toContain('3 of 5 stars toward the next one')
   })
+
+  it('says "tries that you saw" instead of a zero list, and fills one segment for touched words', () => {
+    const log: LogRecord[] = [
+      { kind: 'attempt', t: now - day, activity: 'choose', target: 'car', channel: 'parent', prompts: 0 },
+      { kind: 'attempt', t: now - day, activity: 'choose', target: 'car', channel: 'touch', prompts: 0 },
+    ]
+    const html = renderToStaticMarkup(<Progress childName="  " log={log} garden={{ stars: 0, flowers: 0 }} now={now} />)
+    expect(html).toContain('Your child made <em>2 tries</em> that you saw.')
+    expect(html).not.toContain('0 sounds')
+    expect(html.match(/var\(--hue-choose\)/g)).toHaveLength(1)
+    expect(html).toContain('aria-label="touched or seen"')
+  })
 })

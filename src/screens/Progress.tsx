@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { ACTIVITIES, activityInfo, type ActivityId } from '../data/content'
 import { RUNGS, slpSummary, weekSummary, type LogRecord } from '../data/log'
 import type { Garden } from '../data/garden'
+import { displayName } from '../data/settings'
 
 const WEEK = 7 * 24 * 60 * 60 * 1000
 const MAX_ROWS = 12 // most-tried words only; the SLP summary has the full list
@@ -22,9 +24,13 @@ function wordFacts(log: LogRecord[], now: number) {
 
 export function Progress(props: { childName: string; log: LogRecord[]; garden: Garden; now?: number }) {
   const now = props.now ?? Date.now()
-  const name = props.childName.trim() || 'Your child'
+  const dn = displayName(props.childName)
+  const name = dn[0].toUpperCase() + dn.slice(1) // starts the sentence
+  const [saved, setSaved] = useState(false)
   const w = weekSummary(props.log, now)
   const { hueOf, topAsk } = wordFacts(props.log, now)
+  // only the rungs that happened; an all-zero list reads like failure
+  const rungs = [w.sounds && n(w.sounds, 'sound'), w.close && `${w.close} close`, w.words && n(w.words, 'word')].filter(Boolean)
   const label = (id: ActivityId) => ACTIVITIES.find((a) => a.id === id)?.label ?? id
 
   const share = async () => {
@@ -42,6 +48,7 @@ export function Progress(props: { childName: string; log: LogRecord[]; garden: G
     a.href = url
     a.download = 'alexspeak-summary.txt'
     a.click()
+    setSaved(true)
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
 
@@ -54,7 +61,7 @@ export function Progress(props: { childName: string; log: LogRecord[]; garden: G
         ) : (
           <p className="pa-sentence">
             {name} {w.plays > 0 && <>played <em>{n(w.plays, 'time')}</em> and </>}made <em>{n(w.attempts, 'try', 'tries')}</em>
-            {w.attempts > 0 && `: ${n(w.sounds, 'sound')}, ${w.close} close, ${n(w.words, 'word')}`}.
+            {w.attempts > 0 && (rungs.length ? `: ${rungs.join(', ')}` : ' that you saw')}.
             {w.favourite && ` ${name}'s favourite was ${label(w.favourite)}`}
             {w.favourite && (topAsk ? `, and ${name} asked for ${topAsk[0]} ${n(topAsk[1], 'time')}.` : '.')}
           </p>
@@ -69,11 +76,11 @@ export function Progress(props: { childName: string; log: LogRecord[]; garden: G
           ) : (
             <ul className="pa-word-grid">
               {w.byWord.slice(0, MAX_ROWS).map((row) => {
-                const filled = row.best ? RUNGS.indexOf(row.best) + 1 : 0
+                const filled = row.best ? RUNGS.indexOf(row.best) + 1 : 1 // touched / seen still counts
                 return (
                   <li key={row.target} className="pa-word-row">
                     <span className="pa-word">{row.target}</span>
-                    <span className="pa-bar" role="img" aria-label={row.best ?? 'touch or parent saw it'}>
+                    <span className="pa-bar" role="img" aria-label={row.best ?? 'touched or seen'}>
                       {RUNGS.map((r, i) => (
                         <i key={r} style={i < filled ? { background: `var(--hue-${hueOf.get(row.target) ?? 'song'})` } : undefined} />
                       ))}
@@ -96,7 +103,7 @@ export function Progress(props: { childName: string; log: LogRecord[]; garden: G
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 4v12M7 11l5 5 5-5M5 20h14" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Share with your SLP
+            {saved ? 'Saved' : 'Share with your SLP'}
           </button>
           <p className="pa-note">A one-page summary of dates, activities, prompts and responses. Stays on this tablet until you send it.</p>
         </div>

@@ -17,7 +17,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* safe: content taller than the stage (a full talk board) scrolls instead of clipping at the top */
+  justify-content: safe center;
+  overflow-y: auto;
   gap: 28px;
   padding: 16px 16px 24px;
 }
@@ -25,6 +27,7 @@
 
 .frame-pip { position: absolute; left: calc(60px + env(safe-area-inset-left, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
 .frame-pip--centre { left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 120px; height: 104px; transform: translateX(-50%); }
+.frame-pip--celebrate { left: calc(60px + env(safe-area-inset-left, 0px)); bottom: calc(110px + env(safe-area-inset-bottom, 0px)); width: 170px; height: 147px; transform: none; }
 .frame-hold { position: absolute; right: calc(40px + env(safe-area-inset-right, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
 
 /* Phone and narrow portrait: keep a bottom band for Pip and the hold button so nothing covers the target. */
@@ -45,10 +48,14 @@
   gap: 24px;
   padding: 16px 16px 96px;
   background: var(--h-wash);
-  animation: celebrate-in var(--dur-ui) var(--ease-out);
+  /* the full-screen layer only fades; scaling it would move the whole page */
+  animation: celebrate-fade var(--dur-ui) var(--ease-out);
 }
 .celebrate-stars { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.celebrate-star { animation: star-drift var(--dur-celebrate) var(--ease-out) forwards; }
+/* 6 stars, 60 ms stagger (max 300 ms) + 1200 ms drift = done inside --dur-celebrate (1.5 s) */
+.celebrate-star { animation: star-drift 1200ms var(--ease-out) both; }
+/* Calm: no drift, and no stars left hanging over the moment */
+html[data-calm="true"] .celebrate-star { opacity: 0; }
 .celebrate-disc {
   width: min(400px, 70vw, 44dvh);
   aspect-ratio: 1;
@@ -59,16 +66,22 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  animation: celebrate-in var(--dur-ui) var(--ease-out);
 }
 .celebrate-disc > svg, .celebrate-disc > img { width: 65%; height: 65%; }
 .celebrate-word { color: var(--h-deep); position: relative; text-align: center; }
+/* board-deep on the yellow wash is 2.4:1; the ink partner keeps the word AA */
+.hue-board .celebrate-word { color: var(--hue-board-ink); }
+@keyframes celebrate-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes celebrate-in {
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
 }
 @keyframes star-drift {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-24px); }
+  0% { opacity: 0; transform: translateY(0); }
+  15% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-24px); }
 }
 
 /* ---- Rung chips (parent, 3 s) ---- */
@@ -84,13 +97,16 @@
   padding: 0 16px;
   pointer-events: none;
   animation: chips-in var(--dur-ui) var(--ease-out);
-  transition: opacity 200ms var(--ease-out);
 }
 .chips > * { pointer-events: auto; }
-.chips--leaving { opacity: 0; }
+/* one mechanism for both directions: keyframes in, keyframes out (no transition on top) */
+.chips--leaving { animation: chips-out var(--dur-ui) var(--ease-out) forwards; }
 @keyframes chips-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes chips-out { from { opacity: 1; } to { opacity: 0; } }
+/* Phone: parent chips go up under the strip, out of the celebrate word and the child's reach */
 @media (max-width: 760px) {
-  .chips { bottom: calc(120px + env(safe-area-inset-bottom, 0px)); }
+  .chips { top: calc(80px + env(safe-area-inset-top, 0px)); bottom: auto; }
+  .celebrate { padding-top: 72px; }
 }
 
 /* ---- Mic permission moment ---- */
@@ -126,7 +142,7 @@
 .mic-card p { margin: 0; font-size: 1.125rem; line-height: 1.5; color: var(--ink-2); }
 .mic-card-actions { display: flex; gap: 14px; margin-top: 6px; }
 .mic-yes, .mic-no { flex: 1; min-height: 64px; padding: 0 16px; border-radius: var(--radius-md); font-size: 1.3125rem; }
-.mic-yes { font-weight: 800; }
+.mic-yes { font-size: 1.5rem; font-weight: 800; }
 .hue-board .mic-yes { color: var(--ink); }
 .mic-no {
   border: 1.5px solid var(--line);

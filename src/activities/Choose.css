@@ -21,7 +21,7 @@
   border-radius: var(--radius-xl);
   box-shadow: 0 8px 0 var(--h);
   color: var(--ink);
-  transition: transform var(--dur-press) var(--ease-out), box-shadow var(--dur-press) var(--ease-out);
+  transition: transform var(--dur-press) var(--ease-out); /* edge/ring swap instantly */
 }
 .choose-card:active { transform: translateY(4px); box-shadow: 0 4px 0 var(--h); }
 /* touched card keeps the selected ring while the word is said */
@@ -34,6 +34,8 @@
   line-height: 1;
   letter-spacing: -0.02em;
   padding-bottom: 0.08em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 /* phone portrait: cards stack */

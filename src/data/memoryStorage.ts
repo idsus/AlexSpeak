@@ -21,3 +21,16 @@ export interface StorageLike {
   setItem(key: string, value: string): void
   removeItem(key: string): void
 }
+
+const fallback = new MemoryStorage()
+
+/** localStorage when the browser allows it; otherwise one shared in-memory store (blocked or missing storage). */
+export function safeStorage(): StorageLike {
+  try {
+    const s = globalThis.localStorage
+    if (s) return s
+  } catch {
+    // the getter throws when site data is blocked
+  }
+  return fallback
+}

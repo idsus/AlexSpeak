@@ -72,7 +72,7 @@ export function MemoryMatch({ api, photos, onDone }: ActivityProps) {
               <span className="mm-inner">
                 <span className="mm-face mm-back">
                   <svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z" fill="#FFFFFF" opacity="0.5" />
+                    <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z" fill="var(--surface)" opacity="0.5" />
                   </svg>
                 </span>
                 <span className="mm-face mm-front">

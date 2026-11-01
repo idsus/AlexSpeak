@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { saveSettings, type Settings } from '../data/settings'
+import { displayName, saveSettings, type Settings } from '../data/settings'
 import { loadLog } from '../data/log'
 import { loadGarden } from '../data/garden'
 import { Progress } from './Progress'
@@ -23,7 +23,7 @@ export function Parent({ settings, onChange, onClose }: { settings: Settings; on
     saveSettings(s)
     onChange(s)
   }
-  const name = settings.childName.trim() || 'your child'
+  const name = displayName(settings.childName)
 
   return (
     <div className="pa">

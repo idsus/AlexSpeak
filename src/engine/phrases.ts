@@ -34,10 +34,10 @@ export const PRAISE_LINES: Phrase[] = [
 
 // Played when re-prompts are exhausted — warm, zero pressure, never "you failed".
 export const ENCOURAGE_LINES: Phrase[] = [
-  { id: 'encourage-01', text: 'That is okay! I love spending time with you.' },
+  { id: 'encourage-01', text: 'Thank you for sitting with me!' },
   { id: 'encourage-02', text: 'Great sitting with me! Let us look at another one.' },
-  { id: 'encourage-03', text: 'You are doing great just being here.' },
-  { id: 'encourage-04', text: 'No worries at all. Here comes a new one!' },
+  { id: 'encourage-03', text: 'Good looking!' },
+  { id: 'encourage-04', text: 'I love playing with you!' },
   { id: 'encourage-05', text: 'Thank you for listening so nicely!' },
 ]
 

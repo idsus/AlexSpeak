@@ -81,7 +81,7 @@ export async function fileToResizedDataUrl(
   maxDim = MAX_IMAGE_DIM,
 ): Promise<string> {
   if (!isSupportedImageType(file.type)) {
-    throw new Error('Please choose a JP, PNG, WEBP, GIF, or BMP image')
+    throw new Error('Please choose a JPG, PNG, WEBP, GIF, or BMP image')
   }
   const source = await loadImage(file)
   const sourceWidth =

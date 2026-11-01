@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { CORE_WORDS, type CoreGlyphId, type GlyphId, type Target } from '../data/content'
-import { activeMotivators } from '../data/settings'
+import { activeMotivators, displayName } from '../data/settings'
 import { Glyph } from '../ui/Glyph'
 import type { ActivityProps } from './index'
 import './TalkBoard.css'
@@ -36,7 +36,7 @@ export function TalkBoard({ api, settings, photos }: ActivityProps) {
       <div className="board-core">
         {CORE_WORDS.map((w) => key(w, w.glyph, 'board-key', 56))}
       </div>
-      <div className="board-things" aria-label={`${settings.childName}'s own things`}>
+      <div className="board-things" aria-label={`${displayName(settings.childName)}'s own things`}>
         {motivators.map((m) => key(m, m.glyph, 'board-thing', 48, photos[m.id]))}
       </div>
     </div>

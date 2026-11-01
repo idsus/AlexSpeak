@@ -11,7 +11,7 @@
 
 .ask-disc {
   position: relative;
-  width: min(420px, 72vw, 46dvh);
+  width: min(420px, 72vw, 36dvh);
   aspect-ratio: 1;
   display: flex;
   align-items: center;
@@ -26,11 +26,7 @@
   border: 7px solid var(--h);
   opacity: 0.85;
 }
-.ask-disc--listening .ask-ring { animation: ask-breathe 4s var(--ease-in-out) infinite; }
-@keyframes ask-breathe {
-  0%, 100% { transform: scale(1); opacity: 0.85; }
-  50% { transform: scale(0.96); opacity: 0.6; }
-}
+.ask-disc--listening .ask-ring { animation: breathe 4s var(--ease-in-out) infinite alternate; }
 
 .ask-face {
   width: 85.7%;

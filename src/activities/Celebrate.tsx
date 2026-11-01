@@ -4,9 +4,10 @@ import { Glyph } from '../ui/Glyph'
 import { STAR_PATH } from '../ui/Stars'
 
 // Six soft stars, positions from the canvas (1180×700 stage), drifting up and fading once.
+// Peak opacity ≥ 0.9 and ≥ 40 px each so they read at a glance.
 const DRIFT = [
-  { x: 150, y: 420, s: 1, o: 1 }, { x: 260, y: 300, s: 1.3, o: 0.8 }, { x: 930, y: 330, s: 1, o: 1 },
-  { x: 1030, y: 470, s: 1.3, o: 0.7 }, { x: 860, y: 160, s: 0.85, o: 0.6 }, { x: 330, y: 540, s: 0.85, o: 0.6 },
+  { x: 150, y: 420, s: 1, o: 1 }, { x: 260, y: 300, s: 1.3, o: 0.9 }, { x: 930, y: 330, s: 1, o: 1 },
+  { x: 1030, y: 470, s: 1.3, o: 0.9 }, { x: 860, y: 160, s: 0.85, o: 0.9 }, { x: 330, y: 540, s: 0.85, o: 0.9 },
 ]
 
 /** The celebrate moment: white disc with the picture, the word in the deep hue, stars drifting. */

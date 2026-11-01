@@ -1,7 +1,5 @@
 /* Parent area. Layout and sizes from the ParentProgress / ParentSetUp artboards. */
 .pa {
-  /* #7B8794 on the artboards is 3.7:1 on white; this keeps the look at ≥ 4.9:1 on both surfaces. */
-  --pa-muted: #5D6977;
   min-height: 100dvh;
   background: var(--surface-2);
   color: var(--ink);
@@ -42,7 +40,7 @@
   flex-direction: column;
   gap: 14px;
 }
-.pa-label { font-size: 15px; font-weight: 700; color: var(--pa-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+.pa-label { font-size: 15px; font-weight: 700; color: var(--ink-3-text); letter-spacing: 0.04em; text-transform: uppercase; }
 .pa-note { font-size: 15px; font-weight: 600; color: var(--ink-2); line-height: 1.5; }
 .pa-body { font-size: 17px; font-weight: 600; color: var(--ink-2); line-height: 1.55; }
 .pa-big { font-size: 22px; font-weight: 800; }
@@ -60,7 +58,7 @@
 .pa-word { font-size: 20px; font-weight: 800; overflow-wrap: anywhere; }
 .pa-bar { display: flex; gap: 4px; flex: none; }
 .pa-bar i { width: 22px; height: 10px; border-radius: 5px; background: var(--line); }
-.pa-legend { margin-top: auto !important; color: var(--pa-muted); }
+.pa-legend { margin-top: auto !important; color: var(--ink-3-text); }
 .pa-side { width: 360px; display: flex; flex-direction: column; gap: 14px; }
 .pa-side .pa-card { gap: 10px; }
 .pa-share {
@@ -90,8 +88,8 @@
 .pa-chip:active { transform: scale(0.97); }
 /* Solid orange with white text is 2.4:1, so "on" is the AA-safe tint + ink partner. */
 .pa-chip--on { background: var(--hue-ask-tint); border-color: var(--hue-ask); color: var(--hue-ask-ink); }
-.pa-chip img { width: 28px; height: 28px; margin-left: -8px; border-radius: 999px; object-fit: cover; }
-.pa-chip--add { background: var(--surface-2); border: 1.5px dashed #9A8F78; color: var(--ink); }
+.pa-chip img { flex: none; width: 28px; height: 28px; margin-left: -8px; border-radius: 999px; object-fit: cover; }
+.pa-chip--add { background: var(--surface-2); border: 1.5px dashed var(--ink-3); color: var(--ink); }
 .pa-add { display: flex; flex-direction: column; gap: 10px; }
 .pa-add-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .pa-primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
@@ -133,7 +131,7 @@
 .pa-why .pa-card { gap: 10px; }
 .pa-dot { width: 14px; height: 14px; border-radius: 999px; flex: none; }
 
-.pa-footer { font-size: 14px; font-weight: 600; color: var(--pa-muted); text-align: center; }
+.pa-footer { font-size: 14px; font-weight: 600; color: var(--ink-3-text); text-align: center; }
 
 @media (hover: hover) and (pointer: fine) {
   .pa-tabs button:not([aria-selected="true"]):hover, .pa-close:hover, .pa-chip:hover, .pa-seg button:not([aria-pressed="true"]):hover { border-color: var(--ink-3); }

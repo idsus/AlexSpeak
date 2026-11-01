@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { DEFAULT_MOTIVATORS, type Motivator } from '../data/content'
-import type { MicLevel, Settings } from '../data/settings'
+import { displayName, type MicLevel, type Settings } from '../data/settings'
 import { getAllTargetImages, putTargetImage } from '../data/imageStore'
 import { fileToResizedDataUrl } from '../data/imageProcessing'
 import { listSystemVoices, speakPreview } from '../audio/playClip'
@@ -16,7 +16,7 @@ const MIC_LEVELS: { id: MicLevel; label: string }[] = [
 const slug = (s: string) => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 export function SetUp({ settings, onChange }: { settings: Settings; onChange: (s: Settings) => void }) {
-  const name = settings.childName.trim() || 'your child'
+  const name = displayName(settings.childName)
   const set = (patch: Partial<Settings>) => onChange({ ...settings, ...patch })
 
   const [photos, setPhotos] = useState<Record<string, string>>({})
@@ -48,8 +48,9 @@ export function SetUp({ settings, onChange }: { settings: Settings; onChange: (s
     setPhotoMsg('Saving…')
     try {
       const dataUrl = await fileToResizedDataUrl(file)
-      const existing = all.find((m) => m.id === slug(shown) || m.shown.toLowerCase() === shown)
-      const mot: Motivator = existing ?? { id: slug(shown) || `thing-${Date.now()}`, shown, spoken: shown, glyph: 'star' }
+      const existing = all.find((m) => m.id === `c-${slug(shown)}` || m.shown.toLowerCase() === shown)
+      // c- prefix: a custom 'sock' must not collide with the neutral items' ids
+      const mot: Motivator = existing ?? { id: `c-${slug(shown) || Date.now()}`, shown, spoken: shown, glyph: 'star' }
       await putTargetImage(mot.id, dataUrl)
       setPhotos((p) => ({ ...p, [mot.id]: dataUrl }))
       set({
@@ -71,7 +72,8 @@ export function SetUp({ settings, onChange }: { settings: Settings; onChange: (s
     set({ calm })
   }
 
-  const voiceLabel = settings.voiceName ? `${settings.voiceName} (this tablet)` : 'Tablet default'
+  const hasVoice = 'speechSynthesis' in globalThis
+  const voiceLabel = !hasVoice ? 'No voice on this tablet' : settings.voiceName ? `${settings.voiceName} (this tablet)` : 'Tablet default'
 
   return (
     <div className="pa-setup">
@@ -114,6 +116,9 @@ export function SetUp({ settings, onChange }: { settings: Settings; onChange: (s
               </button>
             )}
           </div>
+          {!all.some((m) => settings.motivatorIds.includes(m.id)) && (
+            <p className="pa-note">Using bubbles, snack, car, tickle</p>
+          )}
           {adding && (
             <div className="pa-add">
               <label htmlFor="pa-new-thing" className="pa-note">What is it? Use the word you say at home.</label>
@@ -186,6 +191,7 @@ export function SetUp({ settings, onChange }: { settings: Settings; onChange: (s
                 <select
                   id="pa-voice"
                   className="pa-select"
+                  disabled={!hasVoice}
                   value={settings.voiceName ?? ''}
                   onChange={(e) => set({ voiceName: e.target.value || null, voiceMode: 'system' })}
                 >
@@ -198,6 +204,7 @@ export function SetUp({ settings, onChange }: { settings: Settings; onChange: (s
               <button
                 type="button"
                 className="parent-btn"
+                disabled={!hasVoice}
                 onClick={() => void speakPreview(`Hi ${settings.childName.trim() || 'there'}! Let's play.`, { volume: settings.volume, soundEnabled: true, voiceMode: 'system', voiceName: settings.voiceName })}
               >
                 hear it

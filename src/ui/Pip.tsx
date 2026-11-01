@@ -33,7 +33,7 @@ export function Pip(props: { mood: PipMood; size?: number; className?: string; w
       <g {...on('delighted')}>
         <path d="M48 70 q8 -10 16 0" stroke={INK} strokeWidth="5" fill="none" strokeLinecap="round" />
         <path d="M86 70 q8 -10 16 0" stroke={INK} strokeWidth="5" fill="none" strokeLinecap="round" />
-        <path d="M55 92 Q75 112 95 92" stroke={INK} strokeWidth="5" fill="#FFFFFF" strokeLinecap="round" />
+        <path d="M55 92 Q75 112 95 92" stroke={INK} strokeWidth="5" fill="var(--surface)" strokeLinecap="round" />
         <circle cx="40" cy="92" r="6" fill="var(--pip-cheek)" opacity="0.8" />
         <circle cx="110" cy="92" r="6" fill="var(--pip-cheek)" opacity="0.8" />
       </g>

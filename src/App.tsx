@@ -49,6 +49,12 @@ export default function App() {
     })
   }, [start])
 
+  // Photos added in Set up reach the activities on the way back home.
+  const atHome = view === 'home'
+  useEffect(() => {
+    if (atHome) void getAllTargetImages().then(setPhotos, () => {})
+  }, [atHome])
+
   useEffect(() => {
     document.documentElement.dataset.calm = String(settings.calm)
   }, [settings.calm])

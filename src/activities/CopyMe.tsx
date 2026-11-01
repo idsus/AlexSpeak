@@ -56,7 +56,7 @@ export function CopyMe({ api, settings, onDone }: ActivityProps) {
         <div className="sc-disc">
           <svg width="230" height="230" viewBox="0 0 230 230" role="img" aria-label={`a big open mouth saying ${target.shown}`}>
             <ellipse cx="115" cy="118" rx="84" ry="62" fill="var(--h)" />
-            <ellipse cx="115" cy="104" rx="70" ry="20" fill="#FFFFFF" />
+            <ellipse cx="115" cy="104" rx="70" ry="20" fill="var(--surface)" />
             <ellipse cx="115" cy="140" rx="40" ry="20" fill="#F2A6B3" />
           </svg>
         </div>
@@ -66,8 +66,8 @@ export function CopyMe({ api, settings, onDone }: ActivityProps) {
         <p className="sc-word copy-word">{target.shown}</p>
         <button type="button" className="chunky copy-again" aria-label="hear it again" onClick={() => api.say(target.spoken)}>
           <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 9v6h4l5 4V5L8 9z" fill="#FFFFFF" />
-            <path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a9 9 0 0 1 0 13" stroke="#FFFFFF" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M4 9v6h4l5 4V5L8 9z" fill="var(--surface)" />
+            <path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a9 9 0 0 1 0 13" stroke="var(--surface)" strokeWidth="2" fill="none" strokeLinecap="round" />
           </svg>
           again
         </button>
