@@ -1,7 +1,7 @@
-import type { Channel } from './stateMachine'
+import type { Channel } from '../data/log'
 
-// Fuses the three detection channels (audio effort, mouth movement, caregiver
-// button) into a single onAttempt callback. Armed for the whole trial;
+// Fuses the three detection channels (mic, touch, parent
+// "I saw it") into a single onAttempt callback. Armed for the whole trial;
 // the first channel to report wins and later reports are ignored until
 // the next arm() — one celebration per trial, regardless of how many
 // detectors fire.

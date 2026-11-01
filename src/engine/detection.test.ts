@@ -5,7 +5,7 @@ describe('DetectionFuser', () => {
   it('does nothing while disarmed', () => {
     const onAttempt = vi.fn()
     const fuser = new DetectionFuser(onAttempt)
-    fuser.report('audio')
+    fuser.report('sound')
     expect(onAttempt).not.toHaveBeenCalled()
   })
 
@@ -13,22 +13,22 @@ describe('DetectionFuser', () => {
     const onAttempt = vi.fn()
     const fuser = new DetectionFuser(onAttempt)
     fuser.arm()
-    fuser.report('mouth')
-    fuser.report('audio')
-    fuser.report('manual')
+    fuser.report('touch')
+    fuser.report('sound')
+    fuser.report('parent')
     expect(onAttempt).toHaveBeenCalledTimes(1)
-    expect(onAttempt).toHaveBeenCalledWith('mouth')
+    expect(onAttempt).toHaveBeenCalledWith('touch')
   })
 
   it('re-arming allows the next trial to fire again', () => {
     const onAttempt = vi.fn()
     const fuser = new DetectionFuser(onAttempt)
     fuser.arm()
-    fuser.report('audio')
+    fuser.report('sound')
     fuser.arm()
-    fuser.report('manual')
+    fuser.report('parent')
     expect(onAttempt).toHaveBeenCalledTimes(2)
-    expect(onAttempt).toHaveBeenLastCalledWith('manual')
+    expect(onAttempt).toHaveBeenLastCalledWith('parent')
   })
 
   it('disarm blocks late reports', () => {
@@ -36,7 +36,7 @@ describe('DetectionFuser', () => {
     const fuser = new DetectionFuser(onAttempt)
     fuser.arm()
     fuser.disarm()
-    fuser.report('audio')
+    fuser.report('sound')
     expect(onAttempt).not.toHaveBeenCalled()
   })
 })

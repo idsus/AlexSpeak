@@ -1,0 +1,86 @@
+/* Home: greeting + star jar, one huge Play, 6 + 3 tiles, the parent lock. */
+.home {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding:
+    calc(36px + env(safe-area-inset-top, 0px))
+    calc(48px + env(safe-area-inset-right, 0px))
+    calc(32px + env(safe-area-inset-bottom, 0px))
+    calc(48px + env(safe-area-inset-left, 0px));
+  gap: 20px;
+}
+.home-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.home-hello { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.home-pip { flex: none; }
+.home-name { overflow-wrap: anywhere; }
+.home-jar {
+  flex: none;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+}
+
+.home-play-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 260px; }
+.home-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 300px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hue-song);
+  box-shadow: 0 10px 0 var(--hue-song-deep), 0 0 0 22px rgba(43, 182, 115, 0.12);
+  transition: transform var(--dur-press) var(--ease-out), box-shadow var(--dur-press) var(--ease-out);
+}
+.home-play svg { width: 124px; height: 124px; }
+.home-play:active { transform: translateY(6px); box-shadow: 0 4px 0 var(--hue-song-deep), 0 0 0 22px rgba(43, 182, 115, 0.12); }
+
+.home-tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+.home-tile { flex: 0 0 calc((100% - 5 * 20px) / 6); min-width: 0; }
+.home-tile-art { width: 64px; height: 64px; }
+
+.home-lock {
+  position: absolute;
+  right: calc(20px + env(safe-area-inset-right, 0px));
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.home-lock:active { transform: scale(0.94); }
+
+/* Phone portrait (PhoneHome artboard): 3-column tiles, smaller Play. */
+@media (max-width: 760px) {
+  .home {
+    padding:
+      calc(24px + env(safe-area-inset-top, 0px))
+      calc(20px + env(safe-area-inset-right, 0px))
+      calc(72px + env(safe-area-inset-bottom, 0px))
+      calc(20px + env(safe-area-inset-left, 0px));
+  }
+  .home-hello { gap: 12px; }
+  .home-pip { width: 52px; height: 45px; }
+  .home-name { font-size: 1.875rem; }
+  .home-jar { padding: 8px 12px; }
+  .home-stars { gap: 6px; }
+  .home-stars svg { width: 20px; height: 20px; }
+  .home-play-wrap { min-height: 240px; }
+  .home-play { width: 220px; height: 220px; box-shadow: 0 10px 0 var(--hue-song-deep), 0 0 0 18px rgba(43, 182, 115, 0.12); }
+  .home-play svg { width: 92px; height: 92px; }
+  .home-tiles { gap: 12px; }
+  .home-tile { flex-basis: calc((100% - 2 * 12px) / 3); padding: 16px 8px; gap: 8px; border-radius: 22px; font-size: 0.9375rem; }
+  .home-tile-art { width: 44px; height: 44px; }
+  .home-lock { right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+}

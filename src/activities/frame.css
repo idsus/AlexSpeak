@@ -1,0 +1,147 @@
+/* ActivityFrame: strip on top, the scene, Pip, the hold button, celebrate, mic card. */
+
+.frame {
+  position: relative;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+.frame--celebrate { background: var(--h-wash); }
+
+.frame-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 16px 16px 24px;
+}
+.frame-stage--centre { padding-bottom: 128px; }
+
+.frame-pip { position: absolute; left: calc(60px + env(safe-area-inset-left, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+.frame-pip--centre { left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 120px; height: 104px; transform: translateX(-50%); }
+.frame-hold { position: absolute; right: calc(40px + env(safe-area-inset-right, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+
+/* Phone and narrow portrait: keep a bottom band for Pip and the hold button so nothing covers the target. */
+@media (max-width: 760px) {
+  .frame-stage, .frame-stage--centre { padding-bottom: 112px; gap: 20px; }
+  .frame-pip, .frame-pip--centre { left: calc(16px + env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 96px; height: 83px; transform: none; }
+  .frame-hold { right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---- Celebrate ---- */
+.celebrate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 16px 96px;
+  background: var(--h-wash);
+  animation: celebrate-in var(--dur-ui) var(--ease-out);
+}
+.celebrate-stars { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.celebrate-star { animation: star-drift var(--dur-celebrate) var(--ease-out) forwards; }
+.celebrate-disc {
+  width: min(400px, 70vw, 44dvh);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--float);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.celebrate-disc > svg, .celebrate-disc > img { width: 65%; height: 65%; }
+.celebrate-word { color: var(--h-deep); position: relative; text-align: center; }
+@keyframes celebrate-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes star-drift {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-24px); }
+}
+
+/* ---- Rung chips (parent, 3 s) ---- */
+.chips {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 16px;
+  pointer-events: none;
+  animation: chips-in var(--dur-ui) var(--ease-out);
+  transition: opacity 200ms var(--ease-out);
+}
+.chips > * { pointer-events: auto; }
+.chips--leaving { opacity: 0; }
+@keyframes chips-in { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 760px) {
+  .chips { bottom: calc(120px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---- Mic permission moment ---- */
+.frame--asking .strip { opacity: 0.5; }
+.frame--asking .frame-stage, .frame--asking .frame-pip, .frame--asking .frame-hold { opacity: 0.35; }
+.mic-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(620px, calc(100% - 32px));
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 36px 40px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--float);
+  animation: mic-in var(--dur-ui) var(--ease-out);
+}
+.mic-card-head { display: flex; align-items: center; gap: 16px; }
+.mic-card-icon {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--h-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mic-card h2 { margin: 0; font-size: 1.75rem; font-weight: 800; line-height: 1.2; }
+.mic-card p { margin: 0; font-size: 1.125rem; line-height: 1.5; color: var(--ink-2); }
+.mic-card-actions { display: flex; gap: 14px; margin-top: 6px; }
+.mic-yes, .mic-no { flex: 1; min-height: 64px; padding: 0 16px; border-radius: var(--radius-md); font-size: 1.3125rem; }
+.mic-yes { font-weight: 800; }
+.hue-board .mic-yes { color: var(--ink); }
+.mic-no {
+  border: 1.5px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-weight: 700;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.mic-no:active { transform: scale(0.97); }
+@keyframes mic-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@media (max-width: 520px) {
+  .mic-card { padding: 28px 24px; }
+  .mic-card h2 { font-size: 1.375rem; }
+  .mic-card-actions { flex-direction: column; }
+}

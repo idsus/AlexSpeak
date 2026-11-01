@@ -1,0 +1,89 @@
+/* Shared child-screen pieces: Pip, hold button, listen disc, stars, photos. */
+
+.pip-face { transition: opacity 200ms var(--ease-out); }
+
+.stars { display: flex; align-items: center; gap: 10px; }
+
+.glyph-photo { object-fit: cover; border-radius: 22%; display: block; }
+
+/* ---- Hold "I saw it" ---- */
+.hold {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 64px;
+  padding: 0 24px 0 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1.1875rem;
+  font-weight: 700;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.hold--on { transform: scale(0.97); }
+.hold-ring {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 4px var(--line);
+}
+.hold-half { position: absolute; top: 0; width: 20px; height: 40px; overflow: hidden; }
+.hold-half--l { left: 0; }
+.hold-half--r { left: 20px; }
+.hold-arc {
+  position: absolute;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  transform: rotate(-45deg);
+  /* release: snap back fast */
+  transition: transform 160ms var(--ease-out);
+}
+.hold-half--r .hold-arc { left: -20px; border-top-color: var(--hold-hue); border-left-color: var(--hold-hue); }
+.hold-half--l .hold-arc { left: 0; border-bottom-color: var(--hold-hue); border-right-color: var(--hold-hue); }
+/* press: slow, deliberate, linear — right half first, then left */
+.hold--on .hold-arc { transform: rotate(135deg); }
+.hold--on .hold-half--r .hold-arc { transition: transform calc(var(--hold) / 2) linear; }
+.hold--on .hold-half--l .hold-arc { transition: transform calc(var(--hold) / 2) linear calc(var(--hold) / 2); }
+.hold-check { position: absolute; inset: 0; }
+
+/* ---- Listen disc ---- */
+.listen {
+  position: relative;
+  width: min(420px, 74vw, 46dvh);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.listen-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 7px solid var(--h);
+  opacity: 0.25;
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+.listen--on .listen-ring { opacity: 0.85; animation: listen-breathe 4s var(--ease-in-out) infinite alternate; }
+.listen-disc {
+  width: 85.7%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.listen-disc > svg, .listen-disc > img { width: 66%; height: 66%; }
+@keyframes listen-breathe {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.96); opacity: 0.6; }
+}

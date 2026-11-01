@@ -42,15 +42,15 @@ describe('state machine', () => {
       createInitialState(),
       { type: 'START_SESSION' },
       { type: 'PROMPT_ENDED' },
-      { type: 'ATTEMPT', channel: 'audio' },
+      { type: 'ATTEMPT', channel: 'sound' },
     )
     expect(s.phase).toBe('celebrate')
-    expect(s.lastChannel).toBe('audio')
+    expect(s.lastChannel).toBe('sound')
     expect(s.successCount).toBe(1)
   })
 
   it('attempts during prompt or model also celebrate (never miss an attempt)', () => {
-    const duringPrompt = run(createInitialState(), { type: 'START_SESSION' }, { type: 'ATTEMPT', channel: 'manual' })
+    const duringPrompt = run(createInitialState(), { type: 'START_SESSION' }, { type: 'ATTEMPT', channel: 'parent' })
     expect(duringPrompt.phase).toBe('celebrate')
 
     const duringModel = run(
@@ -58,10 +58,10 @@ describe('state machine', () => {
       { type: 'START_SESSION' },
       { type: 'PROMPT_ENDED' },
       { type: 'LISTEN_TIMEOUT' },
-      { type: 'ATTEMPT', channel: 'mouth' },
+      { type: 'ATTEMPT', channel: 'touch' },
     )
     expect(duringModel.phase).toBe('celebrate')
-    expect(duringModel.lastChannel).toBe('mouth')
+    expect(duringModel.lastChannel).toBe('touch')
   })
 
   it('listen timeout under the cap re-models the word', () => {
@@ -105,7 +105,7 @@ describe('state machine', () => {
       createInitialState(),
       { type: 'START_SESSION' },
       { type: 'PROMPT_ENDED' },
-      { type: 'ATTEMPT', channel: 'audio' },
+      { type: 'ATTEMPT', channel: 'sound' },
       { type: 'CELEBRATE_DONE' },
     )
     expect(s).toMatchObject({ phase: 'prompt', wordIndex: 1, trialIndex: 1, repromptCount: 0 })
@@ -115,9 +115,9 @@ describe('state machine', () => {
     const s = run(
       createInitialState(),
       { type: 'START_SESSION' },
-      { type: 'ATTEMPT', channel: 'manual' },
+      { type: 'ATTEMPT', channel: 'parent' },
       { type: 'CELEBRATE_DONE' }, // trial 2, word 'ball'
-      { type: 'ATTEMPT', channel: 'manual' },
+      { type: 'ATTEMPT', channel: 'parent' },
       { type: 'CELEBRATE_DONE' }, // trial 3, wraps to 'apple'
     )
     expect(s.wordIndex).toBe(0)
@@ -129,7 +129,7 @@ describe('state machine', () => {
     let state = reduce(createInitialState(), endlessConfig, { type: 'START_SESSION' })
     // Far more trials than trialsPerSession (3) — should never end.
     for (let i = 0; i < 12; i += 1) {
-      state = reduce(state, endlessConfig, { type: 'ATTEMPT', channel: 'manual' })
+      state = reduce(state, endlessConfig, { type: 'ATTEMPT', channel: 'parent' })
       state = reduce(state, endlessConfig, { type: 'CELEBRATE_DONE' })
       expect(state.phase).not.toBe('sessionEnd')
     }
@@ -143,11 +143,11 @@ describe('state machine', () => {
     const s = run(
       createInitialState(),
       { type: 'START_SESSION' },
-      { type: 'ATTEMPT', channel: 'manual' },
+      { type: 'ATTEMPT', channel: 'parent' },
       { type: 'CELEBRATE_DONE' },
-      { type: 'ATTEMPT', channel: 'manual' },
+      { type: 'ATTEMPT', channel: 'parent' },
       { type: 'CELEBRATE_DONE' },
-      { type: 'ATTEMPT', channel: 'manual' },
+      { type: 'ATTEMPT', channel: 'parent' },
       { type: 'CELEBRATE_DONE' },
     )
     expect(s.phase).toBe('sessionEnd')
@@ -178,11 +178,11 @@ describe('state machine', () => {
     const end = run(
       createInitialState(),
       { type: 'START_SESSION' },
-      { type: 'ATTEMPT', channel: 'manual' },
+      { type: 'ATTEMPT', channel: 'parent' },
       { type: 'CELEBRATE_DONE' },
-      { type: 'ATTEMPT', channel: 'manual' },
+      { type: 'ATTEMPT', channel: 'parent' },
       { type: 'CELEBRATE_DONE' },
-      { type: 'ATTEMPT', channel: 'manual' },
+      { type: 'ATTEMPT', channel: 'parent' },
       { type: 'CELEBRATE_DONE' },
     )
     expect(run(end, { type: 'DISMISS' }).phase).toBe('idle')
@@ -190,7 +190,7 @@ describe('state machine', () => {
 
   it('ignores events that make no sense for the current phase', () => {
     const idle = createInitialState()
-    expect(run(idle, { type: 'ATTEMPT', channel: 'audio' })).toEqual(idle)
+    expect(run(idle, { type: 'ATTEMPT', channel: 'sound' })).toEqual(idle)
     expect(run(idle, { type: 'LISTEN_TIMEOUT' })).toEqual(idle)
   })
 })

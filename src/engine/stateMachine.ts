@@ -11,7 +11,8 @@ export type Phase =
   | 'encourage'
   | 'sessionEnd'
 
-export type Channel = 'audio' | 'mouth' | 'manual'
+export type { Channel } from '../data/log'
+import type { Channel } from '../data/log'
 
 export interface SessionConfig {
   words: string[]
