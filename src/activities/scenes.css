@@ -1,0 +1,186 @@
+/* Scenes for Copy me, Song, Uh-oh, Memory match, Count the dots, Find it.
+   Motion is transform/opacity only; theme.css turns it all off under Calm / reduced motion,
+   so every state below is correct when it simply snaps. */
+
+.sc {
+  /* no position here: the chips anchor to .frame-stage, which already keeps the bottom band for Pip */
+  flex: 1;
+  align-self: stretch;
+  min-height: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 6vw, 80px);
+  padding: 0 clamp(0px, 4vw, 64px);
+}
+.sc--col { flex-direction: column; flex-wrap: nowrap; gap: clamp(20px, 4vh, 40px); }
+
+/* Listen ring: 7 px hue, faint while the app talks, breathing while it waits. */
+.sc-ring { position: relative; display: flex; align-items: center; justify-content: center; border-radius: 999px; }
+.sc-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 7px solid var(--h);
+  opacity: 0.3;
+  pointer-events: none;
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+.sc-ring--on::before { opacity: 0.85; animation: sc-breathe 4s var(--ease-in-out) infinite; }
+@keyframes sc-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(0.96); opacity: 0.6; }
+}
+
+.sc-disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+}
+
+.sc-word { font-size: clamp(4rem, 14vw, 10rem); font-weight: 900; line-height: 1; letter-spacing: -0.02em; padding-bottom: 0.08em; margin: 0; color: var(--ink); }
+.sc-hint { margin: 0; font-size: 18px; font-weight: 700; color: var(--ink-3); }
+
+/* Parent chips, bottom-left, clear of Pip in the middle. */
+.sc-chips {
+  position: absolute;
+  left: calc(24px + env(safe-area-inset-left, 0px));
+  bottom: 36px;
+  max-width: calc(50% - 96px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.sc-chips .small-caps { font-size: 14px; margin-right: 6px; }
+.sc-chip { min-height: 36px; height: 36px; padding: 0 14px; font-size: 15px; font-weight: 700; color: var(--ink-2); }
+.sc-chip.chip--on { color: var(--surface); }
+.sc-chips .sc-hint { flex-basis: 100%; font-size: 15px; color: var(--h-ink); }
+
+/* ---- Copy me ---- */
+.copy-ring { width: min(380px, 72vw); aspect-ratio: 1; }
+.copy-ring .sc-disc { width: 84%; }
+.copy-ring svg { width: 72%; height: auto; }
+.copy-side { display: flex; flex-direction: column; align-items: flex-start; gap: 28px; }
+.copy-word { font-size: clamp(5rem, 17vw, 12.5rem); }
+.copy-again svg { flex: none; }
+
+/* ---- Song ---- */
+.song-line { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 0.25em; font-size: clamp(3rem, 8vw, 6.875rem); font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; text-align: center; }
+.song-lead { color: var(--ink-3); }
+.song-blank { min-width: 2.4em; padding: 0.04em 0.3em 0.1em; border-radius: var(--radius-lg); background: var(--surface); }
+.song-blank > span { color: var(--h); opacity: 0.28; transition: opacity var(--dur-ui) var(--ease-out); }
+.song-blank--done > span { opacity: 1; }
+.song-art { width: min(520px, 100%); height: auto; }
+.song-car { transition: transform 600ms var(--ease-out); }
+.song-car--go { transform: translateX(240px); }
+
+/* ---- Uh-oh ---- */
+.uhoh-card {
+  width: min(420px, 100%);
+  aspect-ratio: 420 / 520;
+  max-height: calc(100dvh - 260px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.uhoh-card:active { transform: scale(0.98); }
+.uhoh-card svg { width: 100%; height: 100%; }
+.uhoh-side { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.uhoh-word { font-size: clamp(4rem, 12vw, 9.375rem); opacity: 0.28; transition: opacity var(--dur-ui) var(--ease-out); }
+.uhoh-word--on { opacity: 1; }
+.uhoh-bar { width: 220px; height: 7px; border-radius: 999px; background: var(--h); opacity: 0.3; transition: opacity var(--dur-ui) var(--ease-out); }
+.uhoh-bar--on { opacity: 0.85; }
+/* SVG parts move around their own centre */
+.uhoh-part { transform-box: fill-box; transform-origin: center; transition: transform 600ms var(--ease-out), opacity var(--dur-ui) var(--ease-out); }
+.uhoh-part--hidden { opacity: 0; transform: translateY(-16px); }
+.uhoh-bubble--hidden { opacity: 0; transform: translate(-120px, 160px) scale(0.3); }
+.uhoh-bubble--popped { opacity: 0; transform: scale(1.12); }
+.uhoh-car--go { transform: translateX(166px); }
+.uhoh-car--crash { transform: translateX(160px) rotate(-6deg); }
+.uhoh-burst { opacity: 0; transition: opacity var(--dur-ui) var(--ease-out); }
+.uhoh-burst--on { opacity: 0.6; }
+
+/* ---- Memory match ---- */
+.mm-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; width: min(600px, 100%); }
+.mm-card { height: clamp(120px, 21vh, 170px); padding: 0; border: 0; background: none; perspective: 900px; }
+.mm-inner { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform var(--dur-ui) var(--ease-out); }
+.mm-card--up .mm-inner { transform: rotateY(180deg); }
+.mm-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.mm-back { background: var(--h); box-shadow: 0 6px 0 var(--h-deep); }
+.mm-front { background: var(--surface); box-shadow: 0 0 0 5px var(--h); transform: rotateY(180deg); }
+.mm-front > svg, .mm-front > img { width: 65%; height: auto; max-height: 75%; }
+.mm-side { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 220px; }
+.mm-ring { width: 200px; height: 200px; }
+.mm-word { font-size: clamp(4rem, 10vw, 7.5rem); }
+
+/* ---- Count the dots ---- */
+.count-dots { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--gap, 28px); max-width: min(760px, 100%); }
+.count-dot {
+  width: var(--dot, 170px);
+  height: var(--dot, 170px);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 5px var(--h);
+  color: var(--h);
+  font-size: calc(var(--dot, 170px) * 0.42);
+  font-weight: 900;
+  line-height: 1;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.count-dot:active { transform: scale(0.96); }
+.count-dot--on { background: var(--h); box-shadow: 0 8px 0 var(--h-deep); color: var(--surface); }
+.count-dot--gap { background: var(--surface); box-shadow: 0 0 0 7px var(--h); color: var(--h); }
+.count-side { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 240px; }
+.count-lead { display: flex; flex-wrap: wrap; gap: 0 18px; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; color: var(--ink-3); }
+.count-word { font-size: clamp(4rem, 14vw, 10.625rem); }
+
+/* ---- Find it ---- */
+.find-ask { display: flex; align-items: center; gap: 16px; margin: 0; font-size: clamp(2rem, 4.5vw, 2.75rem); font-weight: 800; color: var(--ink-2); }
+.find-ask b { color: var(--ink); font-weight: 900; }
+.find-named { font-size: clamp(3.5rem, 9vw, 6.5rem); }
+.find-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(16px, 3vw, 40px); }
+.find-card {
+  width: min(300px, 27vw);
+  min-width: 96px;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  transition: transform var(--dur-press) var(--ease-out), box-shadow var(--dur-ui) var(--ease-out);
+}
+.find-card:active { transform: scale(0.97); }
+.find-card--picked { border-color: transparent; box-shadow: 0 0 0 7px var(--h); }
+.find-card > svg, .find-card > img { width: 70%; height: auto; }
+
+/* phone portrait: one column, everything stacks */
+@media (orientation: portrait) and (max-width: 767px) {
+  .sc { flex-direction: column; flex-wrap: nowrap; padding-bottom: 56px; }
+  .copy-side, .count-side { align-items: center; }
+  .sc-chips { max-width: calc(100% - 32px); left: 16px; bottom: 112px; }
+  .find-card { width: min(200px, 40vw); }
+}

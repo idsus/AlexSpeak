@@ -10,6 +10,7 @@ import { ActivityFrame } from './activities/ActivityFrame'
 import { ACTIVITY_COMPONENTS } from './activities'
 import { Home } from './screens/Home'
 import { AllDone } from './screens/AllDone'
+import { Parent } from './screens/Parent'
 
 type View = 'home' | 'parent' | 'alldone' | { activity: ActivityId; mixed?: { endsAt: number; last: ActivityId | null } }
 
@@ -104,14 +105,15 @@ export default function App() {
   }
 
   if (view === 'parent' || view === 'alldone') {
-    // Parent area arrives in Task 6.
     return (
-      <div style={{ padding: 32 }}>
-        <h1 className="title">Parent area</h1>
-        <button type="button" className="parent-btn" onClick={() => setView('home')} style={{ marginTop: 24 }}>
-          Close
-        </button>
-      </div>
+      <Parent
+        settings={settings}
+        onChange={(s) => {
+          saveSettings(s)
+          setSettings(s)
+        }}
+        onClose={() => setView('home')}
+      />
     )
   }
 

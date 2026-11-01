@@ -1,0 +1,44 @@
+.choose {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  /* bottom room for Pip, centred under the cards */
+  padding: 24px 60px 128px;
+}
+
+.choose-card {
+  flex: 1;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 24px 32px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 0 var(--h);
+  color: var(--ink);
+  transition: transform var(--dur-press) var(--ease-out), box-shadow var(--dur-press) var(--ease-out);
+}
+.choose-card:active { transform: translateY(4px); box-shadow: 0 4px 0 var(--h); }
+/* touched card keeps the selected ring while the word is said */
+.choose-card--picked { box-shadow: 0 0 0 7px var(--h); transform: translateY(4px); }
+.choose-card > svg, .choose-card > img { width: min(220px, 100%); height: auto; }
+
+.choose-word {
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  padding-bottom: 0.08em;
+}
+
+/* phone portrait: cards stack */
+@media (orientation: portrait) and (max-width: 767px) {
+  .choose { flex-direction: column; gap: 24px; padding: 16px 16px 128px; }
+  .choose-card { flex: 1 1 0; width: 100%; max-width: 440px; flex-direction: row; justify-content: center; padding: 20px; gap: 20px; }
+  .choose-card > svg, .choose-card > img { width: min(140px, 35vw); }
+}

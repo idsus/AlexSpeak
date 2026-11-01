@@ -1,0 +1,46 @@
+.ask {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.ask-disc {
+  position: relative;
+  width: min(420px, 72vw, 46dvh);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* listen ring: 7px hue at 85%; breathes only while the frame is listening */
+.ask-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  border: 7px solid var(--h);
+  opacity: 0.85;
+}
+.ask-disc--listening .ask-ring { animation: ask-breathe 4s var(--ease-in-out) infinite; }
+@keyframes ask-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(0.96); opacity: 0.6; }
+}
+
+.ask-face {
+  width: 85.7%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.ask-face > * { width: 66%; height: auto; }
