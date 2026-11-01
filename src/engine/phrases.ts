@@ -2,7 +2,7 @@
 // tools/generate_clips.py renders one audio file per id, and playClip falls
 // back to the Web Speech API with the same text when a clip is missing.
 
-import type { ShapingLevel } from '../data/settings'
+type ShapingLevel = string // legacy param, unused
 
 export interface Phrase {
   id: string

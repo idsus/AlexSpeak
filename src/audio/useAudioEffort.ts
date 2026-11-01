@@ -1,5 +1,5 @@
 import { getMicStream } from './useMic'
-import type { Settings } from '../data/settings'
+export type VoiceProfile = 'higher' | 'middle' | 'lower' | 'wide'
 
 export interface AudioEffortScore {
   score: number
@@ -20,7 +20,7 @@ export interface AudioEffortChannelOptions {
   /** Effort score threshold, 0..100. Lower = more sensitive. */
   sensitivity: number
   noiseRejection: number
-  voiceProfile: Settings['audioVoiceProfile']
+  voiceProfile: VoiceProfile
   onAttempt: () => void
   onScore?: (score: AudioEffortScore) => void
 }
@@ -43,7 +43,7 @@ const EPSILON = 0.000001
 
 const clampPercent = (value: number) => Math.round(Math.max(0, Math.min(100, value)))
 
-const VOICE_PROFILES: Record<Settings['audioVoiceProfile'], { label: string; minHz: number; maxHz: number }> = {
+const VOICE_PROFILES: Record<VoiceProfile, { label: string; minHz: number; maxHz: number }> = {
   higher: { label: 'higher', minHz: 180, maxHz: 950 },
   middle: { label: 'middle', minHz: 120, maxHz: 720 },
   lower: { label: 'lower', minHz: 80, maxHz: 520 },
@@ -95,7 +95,7 @@ export class AudioEffortChannel {
     private readonly lowPass: BiquadFilterNode,
     private threshold: number,
     private noiseRejection: number,
-    voiceProfile: Settings['audioVoiceProfile'],
+    voiceProfile: VoiceProfile,
     private readonly onAttempt: () => void,
     private readonly onScore?: (score: AudioEffortScore) => void,
   ) {
