@@ -1,94 +1,63 @@
-# AlexSpeak — Speech Encouragement App
+# AlexSpeak
 
-A gentle, offline, on-device app that prompts a non-verbal / minimally verbal autistic
-person to vocalize a target word and rewards **any communicative effort** — a sound, a
-mouth movement, or a caregiver's confirmation — with warm, immediate, positive feedback.
+An offline tablet app for a minimally verbal autistic child and the parent sitting
+next to them. Open it, tap Play, and you're playing. Every activity rewards **any**
+attempt — a sound, a reach, a touch, or the parent holding "I saw it" — and never scores
+right or wrong.
 
-**The one idea that drives everything:** this is not a "say the word correctly →
-pass/fail" app. It copies how speech-language pathologists actually work — *shaping*:
-reward any vocal attempt first. The detectors answer "did an attempt happen," never
-"was it right." The app never dead-ends in a try-again loop.
+**The one idea that drives everything:** sounds and touches change the world. The screen
+says "Give the bubbles now"; the real thing is the reward.
 
-## How it works
+## What's inside
 
-```
-PROMPT  →  "Alex, can you say apple?"  + big picture     (mic detector paused)
-LISTEN  →  ~6 s window, three channels armed at once:
-             🔊 live vocal-effort score (quiet "ah" sounds, tuned hot)
-             👄 MediaPipe mouth-movement score (silent mouthing)
-             👀 MediaPipe attention score (face present, centered, visible)
-             👀 caregiver "I saw it!" button
-   any channel fires → CELEBRATE  (praise + gentle stars) → next word
-   window expires    → MODEL      (re-say the word warmly) → listen again
-                       after 2–3 re-prompts → ENCOURAGE (warm, zero pressure) → move on
-```
+Nine short activities, each with a one-line coaching tip for the parent at the top:
 
-Everything runs in the browser. **No audio or video ever leaves the device.**
+| Activity | What it teaches | Colour |
+|---|---|---|
+| Ask for it | Requesting with a real motivator (bubbles, snack, a photo of their own toy) | orange |
+| Choose | Picking between two pictures; a touch is talking | blue |
+| Copy me | Sound imitation on a ladder: ah → ba → mama → up → more | violet |
+| Uh-oh! | Cause and effect: stack blocks, blow bubbles, drive a car — and say "uh-oh!" | coral |
+| Fill in the song | "Ready, set, ___" — the pause is the cue | green |
+| Talk board | Eight fixed core words that speak when touched (more, all done, help, open, go, stop, up, mine) | yellow |
+| Memory match | Flip cards, name what you found | blue |
+| Count the dots | Count along, finish the last number | violet |
+| Find it | "Touch the dog" — whatever is touched gets named | green |
+
+Plus **Pip**, a soft companion who reacts to every attempt, and a **star jar**: five stars
+grow a flower in the garden. Stars are never taken away.
+
+The **parent area** (hold the lock in the corner for 1.5 s) has Progress as a plain
+sentence with per-word bars and a one-page summary to share with an SLP, Set up (name,
+things the child loves with photos, play length, mic level with a live meter, Calm mode,
+voice), and Why this works.
+
+Everything runs in the browser. **Nothing is recorded and nothing leaves the device.**
+Calm mode (or the OS reduced-motion setting) turns all motion off.
 
 ## Getting started
 
 ```bash
 npm install
-npm run fetch-models   # copies MediaPipe assets into public/models (one-time)
-npm run dev            # open the printed URL, allow mic (and camera)
+npm run dev
 ```
 
-`npm run build` produces an installable offline PWA in `dist/` (serve it over HTTPS
-or localhost; use "Install app" / "Add to Home Screen").
+Open the printed URL on a tablet or in Chrome. The mic is asked for once, inside the
+first activity that listens; "Not now" keeps everything working via the hold button.
 
-`npm test` runs the unit tests for the state machine, detection fusion, phrase bank,
-settings, and session log.
+`npm run build` produces an installable offline PWA in `dist/`. `npm test` runs the unit
+tests (engine, data, activity render tests).
 
-## Voice clips (optional but recommended)
+## Where things live
 
-Out of the box the app speaks with the browser's built-in voice. For a warmer,
-identical-every-time voice, pre-render clips with Kokoro (local, free):
+- `src/activities/` — one component per activity plus `ActivityFrame` (strip, listen ring,
+  celebrate, logging) and `trial.ts` (the listen/celebrate cycle, tested).
+- `src/data/` — `content.ts` (words, ladder, songs, tips), `settings.ts`, `log.ts`,
+  `garden.ts`, `imageStore.ts` (parent photos, IndexedDB).
+- `src/audio/` — `voice.ts` (Web Speech), `useAttempt.ts` (mic + touch + parent fusion),
+  `useAudioEffort.ts` (on-device vocal-effort detector).
+- `src/screens/` — Home, AllDone, Parent (Progress / SetUp / Why).
+- `PRODUCT.md`, `DESIGN.md` — the product and visual rules the UI follows.
+- `docs/superpowers/specs/` and `docs/superpowers/plans/` — the design and build plan.
 
-```bash
-pip install kokoro soundfile numpy
-python tools/generate_clips.py --name Alex --words apple ball up more
-```
-
-Clips land in `public/clips/` and are picked up automatically (and precached for
-offline use on the next build). Re-run after changing the name or word list.
-
-## Caregiver settings (⚙️ in the app)
-
-Name used in prompts · target words + pictures · listen-window length · number of
-gentle re-prompts · words per session · vocal-effort, Alex voice range, noise-filter,
-mouth, and attention thresholds · camera channel on/off · volume · fallback voice.
-
-For audio tuning, start stricter: keep **Noise filter strength** around 65–75%, pick the
-closest **Alex voice range**, then lower **Vocal effort trigger** only if his real “ah”
-sounds are not scoring.
-
-## Progress (📈 in the app)
-
-Per-trial log (word, which channel fired, response latency, re-prompts) stored in
-`localStorage` only. The export button downloads a JSON summary you can share with a
-speech-language pathologist.
-
-## Project layout
-
-```
-src/engine/    pure state machine, detection fusion, phrase bank  (unit tested)
-src/audio/     mic capture, live vocal-effort scoring, clip playback
-src/vision/    MediaPipe Face Landmarker → mouth + attention scoring
-src/ui/        prompt / reward / settings / progress screens
-src/data/      settings + local-only session log                  (unit tested)
-tools/         build-time only: clip generation (Python), model fetching (Node)
-public/models/ ML assets served locally — created by npm run fetch-models
-public/clips/  pre-rendered voice clips — created by generate_clips.py
-```
-
-## Important notes
-
-- **Involve an SLP if at all possible.** They set achievable targets and can confirm
-  whether verbal output is the right goal. This is a practice supplement, not a
-  replacement for therapy or human connection. Not a medical device.
-- **Respect AAC.** For many non-speaking people, picture/symbol communication is the
-  primary, valid path. Verbal practice is one option, not the only success.
-- **Mic proximity is the cheapest big win** — a clip-on mic near the mouth raises
-  quiet sounds far above the noise floor.
-- Watch for signs the app is becoming aversive and let him disengage — the ✋ Stop
-  button is always one tap away.
+AlexSpeak is a practice tool for home. A speech-language pathologist should set the goals.
