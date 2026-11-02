@@ -30,3 +30,6 @@ tools/smoke-*.png
 # Nested working copies / scratch (not part of this project)
 CODE_AlexSpeak-main/
 .supertonic-ref/
+
+# Downloaded ML models (npm run fetch-models)
+public/models/

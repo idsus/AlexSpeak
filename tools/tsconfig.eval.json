@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "../node_modules/.cache/engine-eval",
+    "rootDir": "../src/engine/eval",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "rewriteRelativeImportExtensions": true,
+    "lib": ["ES2023"],
+    "types": ["node"]
+  },
+  "include": [],
+  "files": ["../src/engine/eval/run.ts"]
+}
