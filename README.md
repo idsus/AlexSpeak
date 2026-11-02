@@ -55,7 +55,8 @@ tests (engine, data, activity render tests).
 - `src/data/` — `content.ts` (words, ladder, songs, tips), `settings.ts`, `log.ts`,
   `garden.ts`, `imageStore.ts` (parent photos, IndexedDB).
 - `src/audio/` — `voice.ts` (Web Speech), `useAttempt.ts` (mic + touch + parent fusion),
-  `useAudioEffort.ts` (on-device vocal-effort detector).
+  `vadChannel.ts` (live mic → attempt engine: Silero VAD OR energy).
+- `src/engine/eval/` — the pure `AttemptEngine` plus the replay harness (`npm run engine:eval`).
 - `src/screens/` — Home, AllDone, Parent (Progress / SetUp / Why).
 - `PRODUCT.md`, `DESIGN.md` — the product and visual rules the UI follows.
 - `docs/superpowers/specs/` and `docs/superpowers/plans/` — the design and build plan.

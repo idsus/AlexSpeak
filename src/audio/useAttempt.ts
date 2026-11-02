@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { DetectionFuser } from '../engine/detection'
 import { micThresholds, type MicLevel } from '../data/settings'
 import type { Channel } from '../data/log'
-import type { AudioEffortChannelOptions } from './useAudioEffort'
+import type { MicChannelOptions } from './vadChannel'
 
 export type MicState = 'off' | 'asking' | 'on' | 'denied'
 
@@ -23,11 +23,11 @@ export interface MicChannelLike {
   setNoiseRejection(n: number): void
 }
 
-export type MicFactory = (opts: AudioEffortChannelOptions) => Promise<MicChannelLike>
+export type MicFactory = (opts: MicChannelOptions) => Promise<MicChannelLike>
 
 const defaultFactory: MicFactory = async (opts) => {
-  const { AudioEffortChannel } = await import('./useAudioEffort')
-  return AudioEffortChannel.create(opts)
+  const { VadChannel } = await import('./vadChannel')
+  return VadChannel.create(opts)
 }
 
 /** One attempt per arm across mic, touch and the parent's button. React-free so it can be tested. */
