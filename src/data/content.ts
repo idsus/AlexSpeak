@@ -1,6 +1,8 @@
 // Everything the activities say and show. Child-facing words are lowercase.
 
-export type ActivityId = 'ask' | 'choose' | 'copy' | 'uhoh' | 'song' | 'board' | 'memory' | 'count' | 'find'
+export type ActivityId =
+  | 'ask' | 'choose' | 'copy' | 'uhoh' | 'song' | 'board' | 'memory' | 'count' | 'find'
+  | 'pop' | 'animals' | 'colours'
 export type HueId = 'ask' | 'choose' | 'copy' | 'uhoh' | 'song' | 'board'
 
 /** spoken = the TTS-safe form ("mah" for "ma"). */
@@ -9,6 +11,7 @@ export interface Target { id: string; shown: string; spoken: string }
 export type GlyphId =
   | 'bubbles' | 'snack' | 'car' | 'tickle' | 'swing' | 'music' | 'ball' | 'tablet'
   | 'sock' | 'spoon' | 'box' | 'dog' | 'cup' | 'cat' | 'star'
+  | 'cow' | 'duck' | 'sheep' | 'pig'
 export type CoreGlyphId = 'more' | 'alldone' | 'help' | 'open' | 'go' | 'stop' | 'up' | 'mine'
 
 /** glyph = key into the SVG glyph set (ui/Glyph.tsx). */
@@ -52,6 +55,12 @@ export const SONGS: { id: string; title: string; lead: string; blank: Target }[]
 
 export const FIND_ITEMS: Motivator[] = [m('dog'), m('car'), m('cup'), m('ball'), m('cat'), m('star')]
 
+/** Animals (play alone): fixed order, so every card always sits in the same place. */
+export const ANIMALS: { glyph: GlyphId; sound: Target }[] = [
+  { glyph: 'dog', sound: t('woof') }, { glyph: 'cat', sound: t('meow') }, { glyph: 'cow', sound: t('moo') },
+  { glyph: 'duck', sound: t('quack') }, { glyph: 'sheep', sound: t('baa', 'bah') }, { glyph: 'pig', sound: t('oink') },
+]
+
 /**
  * tip / celebrateTip are the parent strip sentences. Tokens: {name} child's name,
  * {thing} the real object, {word} the word on screen. sample fills {thing}/{word}
@@ -65,6 +74,7 @@ export const ACTIVITIES: {
   celebrateTip: string
   sample: string
   why: string
+  solo?: true // play alone: touch-only, no hold button, no rung chips, capped stars
 }[] = [
   {
     id: 'ask', label: 'Ask for it', hue: 'ask', sample: 'bubbles',
@@ -119,6 +129,24 @@ export const ACTIVITIES: {
     tip: 'The app says "touch the {word}". Any touch is fine — the one {name} picks gets named big. Any touch is a good answer.',
     celebrateTip: 'Name it again: "{word}!" Point to a real one if you have it.',
     why: 'Hearing a word and touching a picture builds understanding of words. Whatever your child touches is named and celebrated, so there is nothing to get wrong. Understanding words comes before saying them.',
+  },
+  {
+    id: 'pop', label: 'Pop!', hue: 'uhoh', sample: 'pop', solo: true,
+    tip: '{name} can play this one alone. Every bubble touched pops and says "pop!". If you are nearby, say "pop!" too.',
+    celebrateTip: 'Say "{word}!" back, big and happy.',
+    why: 'Touching something and seeing it react right away teaches that your child can make things happen. Every pop comes with the same short word, so your child hears it many times with no pressure to say it. Playing together builds communication more, so these are for moments you cannot sit down.',
+  },
+  {
+    id: 'animals', label: 'Animals', hue: 'song', sample: 'woof', solo: true,
+    tip: '{name} can play this one alone. Each animal says its sound when touched. The cards never move.',
+    celebrateTip: 'Make the animal sound back: "{word}!"',
+    why: 'Animal sounds are some of the easiest first words, and touching a card to hear one is simple cause and effect. The cards stay in the same place every time, so your child can find a favourite and hear it again. Playing together builds communication more, so these are for moments you cannot sit down.',
+  },
+  {
+    id: 'colours', label: 'Colours', hue: 'choose', sample: 'red', solo: true,
+    tip: '{name} can play this one alone. Any basket touched is named; the matching one keeps the shape.',
+    celebrateTip: 'Name the colour back: "{word}!"',
+    why: 'Matching by colour and shape is a calm puzzle your child can try again and again with nothing to get wrong. Every touch is answered with the colour name, so words are modelled while hands are busy. Playing together builds communication more, so these are for moments you cannot sit down.',
   },
 ]
 

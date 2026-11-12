@@ -71,6 +71,35 @@ const ART: Record<GlyphId | CoreGlyphId, Art> = {
     <path d="M29 42h6l-3 3z" fill={INK} />
     <path d="M10 41h10M10 46l10-2M54 41H44M54 46l-10-2" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />
   </>) },
+  cow: { box: 64, draw: () => (<>
+    <path d="M14 18l-6-6M50 18l6-6" stroke="#B8A27A" strokeWidth="4" strokeLinecap="round" />
+    <ellipse cx="10" cy="26" rx="7" ry="4" fill="#F2F0EB" /><ellipse cx="54" cy="26" rx="7" ry="4" fill="#F2F0EB" />
+    <ellipse cx="32" cy="32" rx="18" ry="20" fill="#F2F0EB" stroke="#D8D2C4" strokeWidth="2" />
+    <path d="M18 22a8 8 0 0 0 12-4c-6-3-11-1-12 4z" fill={INK} />
+    <circle cx="25" cy="30" r="3" fill={INK} /><circle cx="39" cy="30" r="3" fill={INK} />
+    <ellipse cx="32" cy="45" rx="13" ry="8" fill="#F4B4B0" />
+    <circle cx="27" cy="45" r="2" fill={INK} /><circle cx="37" cy="45" r="2" fill={INK} />
+  </>) },
+  duck: { box: 64, draw: () => (<>
+    <ellipse cx="34" cy="44" rx="22" ry="13" fill="#FFD23F" />
+    <circle cx="24" cy="24" r="13" fill="#FFD23F" />
+    <path d="M8 26l6-5 6 6z" fill="#F28C28" />
+    <circle cx="25" cy="21" r="2.5" fill={INK} />
+    <path d="M30 42q8 6 16 0" stroke="#E0B21F" strokeWidth="3" fill="none" strokeLinecap="round" />
+  </>) },
+  sheep: { box: 64, draw: () => (<>
+    <path d="M14 34a8 8 0 0 1 4-14 9 9 0 0 1 14-6 9 9 0 0 1 14 6 8 8 0 0 1 4 14 8 8 0 0 1-6 12H20a8 8 0 0 1-6-12z" fill="#F2F0EB" stroke="#D8D2C4" strokeWidth="2" />
+    <ellipse cx="32" cy="38" rx="10" ry="13" fill="#5E5048" />
+    <ellipse cx="19" cy="34" rx="6" ry="3.5" fill="#5E5048" /><ellipse cx="45" cy="34" rx="6" ry="3.5" fill="#5E5048" />
+    <circle cx="28" cy="35" r="2.5" fill="var(--surface)" /><circle cx="36" cy="35" r="2.5" fill="var(--surface)" />
+  </>) },
+  pig: { box: 64, draw: () => (<>
+    <path d="M14 22L12 8l13 8zM50 22l2-14-13 8z" fill="#E98A9A" />
+    <ellipse cx="32" cy="36" rx="21" ry="18" fill="#F4A9B5" />
+    <circle cx="24" cy="30" r="3" fill={INK} /><circle cx="40" cy="30" r="3" fill={INK} />
+    <ellipse cx="32" cy="42" rx="9" ry="6.5" fill="#E98A9A" />
+    <ellipse cx="29" cy="42" rx="1.8" ry="2.6" fill={INK} /><ellipse cx="35" cy="42" rx="1.8" ry="2.6" fill={INK} />
+  </>) },
   cup: { box: 24, draw: ({ H }) => (<>
     <path d="M5 6h11v9a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z" fill={H} />
     <path d="M16 8h2a2.5 2.5 0 0 1 0 5h-2" stroke={H} strokeWidth="2" fill="none" />

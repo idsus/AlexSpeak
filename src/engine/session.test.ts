@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { pickNext } from './session'
 import type { ActivityId } from '../data/content'
 
-const zero = (): Record<ActivityId, number> => ({ ask: 0, choose: 0, copy: 0, uhoh: 0, song: 0, board: 0, memory: 0, count: 0, find: 0 })
+const zero = (): Record<ActivityId, number> => ({ ask: 0, choose: 0, copy: 0, uhoh: 0, song: 0, board: 0, memory: 0, count: 0, find: 0, pop: 0, animals: 0, colours: 0 })
 const POOL: ActivityId[] = ['uhoh', 'copy', 'ask', 'choose', 'song', 'memory', 'count']
 
 describe('pickNext', () => {

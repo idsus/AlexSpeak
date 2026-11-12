@@ -36,6 +36,18 @@ describe('TrialRunner', () => {
     await expect(outcome).resolves.toEqual({ kind: 'attempt', channel: 'touch', prompts: 0 })
   })
 
+  it('solo trials skip the mic card, ignore waitMs and never end in sat', async () => {
+    const ask = vi.fn(async () => {})
+    const runner = new TrialRunner({ speak: vi.fn(async () => {}), sleep, micCard: { needed: () => true, ask } })
+    const outcome = runner.runTrial(star, { say: false, waitMs: 10, solo: true })
+    expect(runner.armed).toBe(true)
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(runner.armed).toBe(true)
+    runner.attempt('touch')
+    await expect(outcome).resolves.toEqual({ kind: 'attempt', channel: 'touch', prompts: 0 })
+    expect(ask).not.toHaveBeenCalled()
+  })
+
   it('takes one attempt per trial', async () => {
     const { runner } = setup(0)
     const outcome = runner.runTrial(star, { say: false })

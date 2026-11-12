@@ -7,6 +7,7 @@ export interface TrialOptions {
   waitMs?: number // default 5000; <= 0 waits until an attempt
   listening?: boolean // default true: mic + listen ring; false = touch / parent only
   quiet?: boolean // no celebrate overlay or star: log + Pip delighted only (talk board)
+  solo?: boolean // play alone: wait forever, never re-model, never ask for the mic; the frame celebrates softly
 }
 
 export const DEAD_TIME_MS = 400
@@ -63,14 +64,15 @@ export class TrialRunner {
   }
 
   runTrial(target: Target, opts: TrialOptions = {}): Promise<TrialOutcome> {
-    const { say = true, waitMs = 5000, listening = true } = opts
+    const { say = true, listening = true, solo = false } = opts
+    const waitMs = solo ? 0 : (opts.waitMs ?? 5000)
     const id = ++this.run
     const live = () => id === this.run
     this.pending = null
     this.listening = listening
     this.setArmed(false)
     return (async (): Promise<TrialOutcome> => {
-      if (listening && this.deps.micCard?.needed()) await this.deps.micCard.ask()
+      if (listening && !solo && this.deps.micCard?.needed()) await this.deps.micCard.ask()
       for (let prompts = 0; prompts < 2; prompts++) {
         if (!live()) return NEVER
         if (say) await this.say(target.spoken)

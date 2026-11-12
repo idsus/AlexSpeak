@@ -53,4 +53,15 @@ describe('Progress', () => {
     expect(html).toContain("lighter = app&#x27;s guess")
     expect(html).toContain('…and looked 2 times')
   })
+
+  it('adds "played alone" for solo touches without counting them as tries', () => {
+    const log: LogRecord[] = [
+      { kind: 'session', t: now - day, ms: 60000 },
+      { kind: 'attempt', t: now - day, activity: 'colours', target: 'red', channel: 'touch', prompts: 0 },
+      { kind: 'attempt', t: now - day, activity: 'colours', target: 'blue', channel: 'touch', prompts: 0 },
+    ]
+    const html = renderToStaticMarkup(<Progress childName="Sam" log={log} garden={{ stars: 0, flowers: 0 }} now={now} />)
+    expect(html).toContain('<em>0 tries</em>')
+    expect(html).toContain('…and played alone 2 times.')
+  })
 })

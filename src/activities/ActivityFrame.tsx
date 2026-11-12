@@ -34,6 +34,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 const PIP_CENTRE: ActivityId[] = ['choose', 'copy', 'song', 'count']
 const SEGMENT_FRESH_MS = 4000 // a segment older than this belongs to an earlier attempt
 const RATED: Rung[] = ['sound', 'close', 'word']
+const SOLO_STAR_EVERY = 8 // play-alone touches per star, so the jar can't be farmed
 
 // Mic answer for this app session: "Yes" re-opens the mic silently next time, "Not now" stops asking.
 let sessionMic: 'yes' | 'no' | null = null
@@ -65,6 +66,7 @@ export function ActivityFrame(props: {
   const pendingLog = useRef<Attempt | null>(null)
   const timers = useRef<number[]>([])
   const encourage = useMemo(() => makePicker(ENCOURAGE_LINES), [])
+  const soloTouches = useRef(0)
 
   const attemptRef = useRef<{ micState: string; requestMic(): Promise<void> } | null>(null)
   const runner = useMemo(
@@ -173,10 +175,15 @@ export function ActivityFrame(props: {
         return out
       }
       const record: Attempt = { kind: 'attempt', t: Date.now(), activity, target: t.id, channel: out.channel, prompts: out.prompts, ...seen }
-      if (opts.quiet) {
+      if (opts.quiet || opts.solo) {
         appendRecord(record)
         setPipFlash(true)
         later(() => setPipFlash(false), 600)
+        if (opts.solo) {
+          // a touch already spoke its word; a sound gets the word back, softly, with no overlay
+          if (out.channel === 'sound') void runner.say(`${t.spoken}!`)
+          if (++soloTouches.current % SOLO_STAR_EVERY === 0) state.onStar()
+        }
         return out
       }
       // Log now-ish: the parent has 3 s to add what the child did.
@@ -259,7 +266,7 @@ export function ActivityFrame(props: {
         waves={listening && attempt.micState === 'on'}
         className={`frame-pip ${PIP_CENTRE.includes(activity) ? 'frame-pip--centre' : ''} ${celebrating ? 'frame-pip--celebrate' : ''}`}
       />
-      {!celebrating && (
+      {!celebrating && !info.solo && (
         <HoldButton label="I saw it" hue={info.hue} className="frame-hold" onHold={() => runner.attempt('parent')} />
       )}
       {chips && <RungChips selected={chips.rung} leaving={chips.leaving} childName={displayName(settings.childName)} onPick={pickRung} />}

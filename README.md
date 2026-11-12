@@ -10,7 +10,10 @@ says "Give the bubbles now"; the real thing is the reward.
 
 ## What's inside
 
-Nine short activities, each with a one-line coaching tip for the parent at the top:
+Twelve short activities, each with a one-line coaching tip for the parent at the top. The last
+three are for playing alone, for moments the parent can't sit down: every touch does something
+and says one word, with no waiting, no hold button and at most one star per eight touches.
+They stay out of the mixed Play session, and Progress counts them as "played alone", not as tries.
 
 | Activity | What it teaches | Colour |
 |---|---|---|
@@ -23,6 +26,9 @@ Nine short activities, each with a one-line coaching tip for the parent at the t
 | Memory match | Flip cards, name what you found | blue |
 | Count the dots | Count along, finish the last number | violet |
 | Find it | "Touch the dog" — whatever is touched gets named | green |
+| Pop! (alone) | Bubbles drift up; each touch pops one and says "pop!" | coral |
+| Animals (alone) | Six fixed animal cards that say their sound (woof, meow, moo, quack, baa, oink) | green |
+| Colours (alone) | Drop the shape in a basket; every basket touched is named, a match keeps it | blue |
 
 Plus **Pip**, a soft companion who reacts to every attempt, and a **star jar**: five stars
 grow a flower in the garden. Stars are never taken away.

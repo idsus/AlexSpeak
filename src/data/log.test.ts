@@ -44,6 +44,23 @@ describe('log', () => {
     expect(w.byWord.find((r) => r.target === 'bubbles')).toEqual({ target: 'bubbles', best: 'close', guess: null, count: 2 })
   })
 
+  it('counts play-alone touches as solo, never as tries, words or the favourite', () => {
+    const log: LogRecord[] = [
+      { kind: 'attempt', t: NOW - DAY, activity: 'pop', target: 'pop', channel: 'touch', prompts: 0 },
+      { kind: 'attempt', t: NOW - DAY, activity: 'pop', target: 'pop', channel: 'touch', prompts: 0 },
+      { kind: 'attempt', t: NOW - DAY, activity: 'animals', target: 'woof', channel: 'sound', prompts: 0 },
+      { kind: 'attempt', t: NOW - DAY, activity: 'ask', target: 'car', channel: 'touch', prompts: 0 },
+    ]
+    const w = weekSummary(log, NOW)
+    expect(w.solo).toBe(3)
+    expect(w.attempts).toBe(1)
+    expect(w.sounds).toBe(0)
+    expect(w.byActivity.pop).toBe(2)
+    expect(w.favourite).toBe('ask')
+    expect(w.byWord.map((r) => r.target)).toEqual(['car'])
+    expect(slpSummary(log, 'Alex', NOW)).toContain('Played alone (touches, not counted as attempts): 3.')
+  })
+
   it('counts word rungs for a target across all time', () => {
     const log: LogRecord[] = [
       { kind: 'attempt', t: 1, activity: 'ask', target: 'car', channel: 'parent', rung: 'word', prompts: 0 },

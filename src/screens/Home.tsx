@@ -15,12 +15,16 @@ const TILE_ART: Record<ActivityId, ReactElement> = {
   board: <><rect x="8" y="12" width="20" height="18" rx="5" fill="var(--hue-board)" /><rect x="36" y="12" width="20" height="18" rx="5" fill="var(--hue-board)" /><rect x="8" y="36" width="20" height="18" rx="5" fill="var(--hue-board)" /><rect x="36" y="36" width="20" height="18" rx="5" fill="var(--hue-board)" /></>,
   memory: <><rect x="6" y="12" width="24" height="40" rx="7" fill="var(--hue-choose)" /><rect x="34" y="12" width="24" height="40" rx="7" fill="var(--surface)" stroke="var(--hue-choose)" strokeWidth="4" /><circle cx="46" cy="32" r="6" fill="var(--hue-choose)" /></>,
   count: <><circle cx="14" cy="32" r="8" fill="var(--hue-copy)" /><circle cx="32" cy="32" r="8" fill="var(--hue-copy)" /><circle cx="50" cy="32" r="8" fill="var(--hue-copy)" opacity="0.45" /></>,
+  pop: <><circle cx="30" cy="34" r="18" fill="none" stroke="var(--hue-uhoh)" strokeWidth="5" /><path d="M52 12l-5 5M56 26h-6M40 6l-1 6" stroke="var(--hue-uhoh)" strokeWidth="4" strokeLinecap="round" /></>,
+  animals: <><ellipse cx="32" cy="38" rx="18" ry="15" fill="var(--hue-song)" /><ellipse cx="14" cy="26" rx="7" ry="11" fill="var(--hue-song)" opacity="0.45" /><ellipse cx="50" cy="26" rx="7" ry="11" fill="var(--hue-song)" opacity="0.45" /><circle cx="26" cy="35" r="3" fill="var(--surface)" /><circle cx="38" cy="35" r="3" fill="var(--surface)" /></>,
+  colours: <><circle cx="16" cy="20" r="11" fill="var(--hue-choose)" /><rect x="37" y="9" width="22" height="22" rx="5" fill="var(--hue-choose)" opacity="0.7" /><path d="M32 34l14 24H18z" fill="var(--hue-choose)" opacity="0.45" /></>,
   find: <><circle cx="28" cy="28" r="15" fill="none" stroke="var(--hue-song)" strokeWidth="6" /><path d="M39 39l13 13" stroke="var(--hue-song)" strokeWidth="7" strokeLinecap="round" /></>,
 }
 
 const LOCK_MS = 1500
 const FIRST_ROW: ActivityId[] = ['ask', 'choose', 'copy', 'uhoh', 'song', 'board']
 const GAMES: ActivityId[] = ['memory', 'count', 'find']
+const SOLO: ActivityId[] = ['pop', 'animals', 'colours']
 
 export function Home(props: {
   childName: string
@@ -62,6 +66,8 @@ export function Home(props: {
       <nav className="home-tiles" aria-label="Activities">
         {FIRST_ROW.map(tile)}
         {GAMES.map(tile)}
+        <p className="small-caps home-solo">play alone</p>
+        {SOLO.map(tile)}
       </nav>
 
       <button

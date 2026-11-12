@@ -26,6 +26,7 @@ export const RUNGS: Rung[] = ['looked', 'reached', 'sound', 'close', 'word']
 
 const KEY = 'alexspeak.v2.log'
 const WEEK = 7 * 24 * 60 * 60 * 1000
+const SOLO_IDS = new Set<ActivityId>(ACTIVITIES.filter((a) => a.solo).map((a) => a.id))
 const validTime = (t: unknown): t is number => typeof t === 'number' && Math.abs(t) <= 8.64e15
 
 export function loadLog(storage: StorageLike = safeStorage()): LogRecord[] {
@@ -60,6 +61,8 @@ export interface WeekSummary {
   byWord: { target: string; best: Rung | null; guess: Rung | null; count: number }[]
   byActivity: Record<ActivityId, number>
   looked: number
+  /** touches and sounds in play-alone activities: counted here, never as tries */
+  solo: number
 }
 
 /** The rung an attempt counts as: the parent's chip, else 'sound' when the mic fired. */
@@ -68,18 +71,20 @@ const better = (a: Rung | null, b: Rung | null) => (RUNGS.indexOf(b as Rung) > R
 
 export function weekSummary(log: LogRecord[], now: number = Date.now()): WeekSummary {
   const recent = log.filter((r) => r.t > now - WEEK && r.t <= now)
-  const attempts = recent.filter((r): r is Attempt => r.kind === 'attempt')
+  const all = recent.filter((r): r is Attempt => r.kind === 'attempt')
+  const attempts = all.filter((a) => !SOLO_IDS.has(a.activity))
   const byActivity = Object.fromEntries(ACTIVITIES.map((a) => [a.id, 0])) as Record<ActivityId, number>
   const words = new Map<string, WeekSummary['byWord'][number]>()
+  for (const a of all) byActivity[a.activity] = (byActivity[a.activity] ?? 0) + 1
   for (const a of attempts) {
-    byActivity[a.activity] = (byActivity[a.activity] ?? 0) + 1
     const w = words.get(a.target) ?? { target: a.target, best: null, guess: null, count: 0 }
     w.best = better(w.best, effectiveRung(a))
     if (!a.rung && a.suggested) w.guess = better(w.guess, a.suggested)
     w.count += 1
     words.set(a.target, w)
   }
-  const top = Math.max(0, ...Object.values(byActivity))
+  const tried = (Object.keys(byActivity) as ActivityId[]).filter((k) => !SOLO_IDS.has(k))
+  const top = Math.max(0, ...tried.map((k) => byActivity[k]))
   const count = (rung: Rung) => attempts.filter((a) => effectiveRung(a) === rung).length
   return {
     plays: recent.filter((r) => r.kind === 'session').length,
@@ -88,12 +93,13 @@ export function weekSummary(log: LogRecord[], now: number = Date.now()): WeekSum
     close: count('close'),
     words: count('word'),
     requests: byActivity.ask,
-    favourite: top > 0 ? (Object.keys(byActivity) as ActivityId[]).find((k) => byActivity[k] === top)! : null,
+    favourite: top > 0 ? tried.find((k) => byActivity[k] === top)! : null,
     byWord: [...words.values()]
       .map((w) => ({ ...w, guess: RUNGS.indexOf(w.guess as Rung) > RUNGS.indexOf(w.best as Rung) ? w.guess : null }))
       .sort((a, b) => b.count - a.count),
     byActivity,
     looked: recent.filter((r) => (r.kind === 'attempt' || r.kind === 'sat') && r.looked).length,
+    solo: all.length - attempts.length,
   }
 }
 
@@ -115,7 +121,7 @@ export function slpSummary(log: LogRecord[], childName: string, now: number = Da
     `Week ending ${day(now)} (last 7 days). Home practice with a parent; any attempt is rewarded, nothing is scored right or wrong.`,
     '',
     'THIS WEEK',
-    `Plays: ${w.plays} (about ${minutes} min). Attempts: ${w.attempts}. Sounds: ${w.sounds}. Close: ${w.close}. Words: ${w.words}. Requests: ${w.requests}. Waited without a response: ${sat}.`,
+    `Plays: ${w.plays} (about ${minutes} min). Attempts: ${w.attempts}. Sounds: ${w.sounds}. Close: ${w.close}. Words: ${w.words}. Requests: ${w.requests}. Waited without a response: ${sat}. Played alone (touches, not counted as attempts): ${w.solo}.`,
     '',
     'BY ACTIVITY (attempts)',
     ...ACTIVITIES.filter((a) => w.byActivity[a.id] > 0).map((a) => `- ${a.label}: ${w.byActivity[a.id]}`),

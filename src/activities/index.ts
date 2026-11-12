@@ -11,6 +11,9 @@ import { UhOh } from './UhOh'
 import { MemoryMatch } from './MemoryMatch'
 import { CountDots } from './CountDots'
 import { FindIt } from './FindIt'
+import { Pop } from './Pop'
+import { Animals } from './Animals'
+import { Colours } from './Colours'
 
 export interface ActivityProps {
   api: FrameApi
@@ -29,4 +32,7 @@ export const ACTIVITY_COMPONENTS: Record<ActivityId, ComponentType<ActivityProps
   memory: MemoryMatch,
   count: CountDots,
   find: FindIt,
+  pop: Pop,
+  animals: Animals,
+  colours: Colours,
 }

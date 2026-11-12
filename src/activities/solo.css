@@ -1,0 +1,112 @@
+/* Play-alone scenes: Pop!, Animals, Colours. Transform/opacity only; under Calm / reduced motion
+   theme.css stops every animation and transition, and the rules at the bottom give the static layouts. */
+
+/* ---- Pop! ---- */
+.pop-field {
+  position: relative;
+  flex: 1;
+  align-self: stretch;
+  min-height: 0;
+  overflow: hidden;
+  container-type: size; /* cqh below = the field's own height */
+}
+.pop-bubble {
+  position: absolute;
+  top: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  /* constant drift: linear is right for steady motion; one pass, then the lane gets a new bubble */
+  animation: pop-rise 9s linear both;
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+.pop-bubble svg { width: 100%; height: 100%; }
+/* pops where it is: stops rising and fades, no scale overshoot */
+.pop-bubble--popped { opacity: 0; animation-play-state: paused; pointer-events: none; }
+@keyframes pop-rise {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100cqh - 100%)); }
+}
+.pop-word {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--h-deep);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+.pop-word--on { opacity: 1; }
+
+/* Calm / reduced motion: the same bubbles sit still in a grid and come back in place */
+html[data-calm="true"] .pop-field { display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 24px; padding: 16px; }
+/* one size for all, so a new bubble lands exactly where the popped one was */
+html[data-calm="true"] .pop-bubble { position: static; width: 144px !important; height: 144px !important; }
+@media (prefers-reduced-motion: reduce) {
+  .pop-field { display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 24px; padding: 16px; }
+  .pop-bubble { position: static; width: 144px !important; height: 144px !important; }
+}
+
+/* ---- Animals ---- */
+.animal-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 2.4vw, 24px); width: min(720px, 100%); }
+.animal-card {
+  aspect-ratio: 4 / 3;
+  max-height: 24dvh;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.animal-card:active { transform: scale(0.97); }
+.animal-card--on { border-color: transparent; box-shadow: 0 0 0 7px var(--h); }
+.animal-card > svg { width: auto; height: 78%; }
+.animal-word { min-height: 1.08em; color: var(--h-ink); animation: solo-in var(--dur-ui) var(--ease-out); }
+
+/* ---- Colours ---- */
+.col-blob {
+  width: min(200px, 24dvh);
+  aspect-ratio: 1;
+  transition: transform var(--dur-move) var(--ease-out), opacity var(--dur-move) var(--ease-out);
+  animation: solo-in var(--dur-ui) var(--ease-out);
+}
+.col-blob svg { width: 100%; height: 100%; }
+.col-baskets { display: flex; justify-content: center; gap: clamp(12px, 4vw, 48px); width: min(820px, 100%); }
+.col-basket {
+  position: relative;
+  flex: 1 1 0;
+  max-width: 240px;
+  min-height: 96px;
+  aspect-ratio: 6 / 5;
+  padding: 0;
+  border: 0;
+  background: none;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.col-basket:active { transform: scale(0.97); }
+.col-basket > svg { width: 100%; height: 100%; }
+.col-mark { position: absolute; left: 50%; top: 62%; width: 30%; transform: translate(-50%, -50%); }
+.col-mark svg { width: 100%; height: auto; }
+/* Calm: the blob never travels; a match just swaps to the next one */
+html[data-calm="true"] .col-blob { transform: none !important; }
+@media (prefers-reduced-motion: reduce) { .col-blob { transform: none !important; } }
+
+@keyframes solo-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (orientation: portrait) and (max-width: 767px) {
+  .animal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .animal-card { max-height: 18dvh; }
+  /* three across a phone: square baskets keep each ≥ 100 px without overflowing */
+  .col-baskets { gap: 12px; }
+  .col-basket { aspect-ratio: 1; min-height: 0; min-width: 0; }
+}

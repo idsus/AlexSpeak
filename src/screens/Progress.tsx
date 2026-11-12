@@ -57,13 +57,14 @@ export function Progress(props: { childName: string; log: LogRecord[]; garden: G
     <div className="pa-progress">
       <section className="pa-card pa-week" aria-labelledby="pa-week-h">
         <h2 id="pa-week-h" className="pa-label">This week</h2>
-        {w.attempts === 0 && w.plays === 0 ? (
+        {w.attempts === 0 && w.plays === 0 && w.solo === 0 ? (
           <p className="pa-sentence">No plays yet this week — tap Play with Alex and come back.</p>
         ) : (
           <p className="pa-sentence">
             {name} {w.plays > 0 && <>played <em>{n(w.plays, 'time')}</em> and </>}made <em>{n(w.attempts, 'try', 'tries')}</em>
             {w.attempts > 0 && (rungs.length ? `: ${rungs.join(', ')}` : ' that you saw')}
-            {w.looked > 0 && ` …and looked ${n(w.looked, 'time')}`}.
+            {w.looked > 0 && ` …and looked ${n(w.looked, 'time')}`}
+            {w.solo > 0 && ` …and played alone ${n(w.solo, 'time')}`}.
             {w.favourite && ` ${name}'s favourite was ${label(w.favourite)}`}
             {w.favourite && (topAsk ? `, and ${name} asked for ${topAsk[0]} ${n(topAsk[1], 'time')}.` : '.')}
           </p>
