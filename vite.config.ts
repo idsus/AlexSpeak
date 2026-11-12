@@ -13,12 +13,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         // Everything the app needs is precached so it works fully offline.
-        // Silero VAD + ORT's single-thread WASM live in public/models/vad (npm run fetch-models).
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,mp3,wav,woff2,onnx,wasm}'],
+        // Silero VAD + ORT's single-thread WASM live in public/models/vad, MediaPipe Face Landmarker
+        // (opt-in camera) in public/models/vision (npm run fetch-models).
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,mp3,wav,woff2,onnx,wasm,task}'],
         // The bundler also emits ORT's wasm into assets/; we serve the public/models copy, so skip the duplicate.
         globIgnores: ['**/assets/ort-wasm-*.wasm'],
-        // ort-wasm-simd-threaded.wasm is ~14.3 MB, the largest file.
-        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
+        // The CAM++ speaker model (~29.6 MB) is the largest file.
+        maximumFileSizeToCacheInBytes: 31 * 1024 * 1024,
       },
       manifest: {
         name: 'AlexSpeak',

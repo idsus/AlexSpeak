@@ -41,7 +41,7 @@ describe('log', () => {
     expect(w.favourite).toBe('ask')
     expect(w.byActivity.ask).toBe(2)
     expect(w.byActivity.find).toBe(0)
-    expect(w.byWord.find((r) => r.target === 'bubbles')).toEqual({ target: 'bubbles', best: 'close', count: 2 })
+    expect(w.byWord.find((r) => r.target === 'bubbles')).toEqual({ target: 'bubbles', best: 'close', guess: null, count: 2 })
   })
 
   it('counts word rungs for a target across all time', () => {
@@ -84,5 +84,20 @@ describe('log', () => {
       if (desc) Object.defineProperty(globalThis, 'localStorage', desc)
       else delete (globalThis as { localStorage?: unknown }).localStorage
     }
+  })
+})
+
+describe('app guesses and camera in the week summary', () => {
+  it('keeps the parent rung as best and only shows a higher, untapped suggestion as a guess', () => {
+    const log: LogRecord[] = [
+      { kind: 'attempt', t: NOW - DAY, activity: 'ask', target: 'more', channel: 'sound', prompts: 0, suggested: 'close', looked: true },
+      { kind: 'attempt', t: NOW - DAY, activity: 'ask', target: 'ba', channel: 'sound', prompts: 0, rung: 'word', suggested: 'sound' },
+      { kind: 'sat', t: NOW - DAY, activity: 'ask', target: 'ba', looked: true },
+    ]
+    const w = weekSummary(log, NOW)
+    expect(w.byWord.find((r) => r.target === 'more')).toMatchObject({ best: 'sound', guess: 'close' })
+    expect(w.byWord.find((r) => r.target === 'ba')).toMatchObject({ best: 'word', guess: null })
+    expect(w.close).toBe(0) // the sentence counts stay what the parent saw
+    expect(w.looked).toBe(2)
   })
 })

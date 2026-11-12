@@ -18,6 +18,14 @@ export interface Settings {
   voiceMode: 'server' | 'system'
   serverVoice: string
   importedLegacy: boolean
+  /** Averaged, L2-normalised speaker embeddings of up to two adults. Never audio. */
+  parentVoices: number[][]
+  /** Median F0 (Hz) per enrolled adult, 0 when unknown; drives the cheap low-voice pre-check. */
+  parentPitch: number[]
+  /** Cosine similarity at or above which a voice counts as an enrolled adult. */
+  parentThreshold: number
+  keepClips: boolean
+  cameraEnabled: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -35,7 +43,20 @@ export const DEFAULT_SETTINGS: Settings = {
   voiceMode: 'system',
   serverVoice: 'af_bella',
   importedLegacy: false,
+  parentVoices: [],
+  parentPitch: [],
+  parentThreshold: 0.45,
+  keepClips: false,
+  cameraEnabled: false,
 }
+
+export const MAX_PARENTS = 2
+export const PARENT_THRESHOLD_MIN = 0.3
+export const PARENT_THRESHOLD_MAX = 0.7
+export const clampParentThreshold = (n: number) =>
+  Math.round(Math.min(PARENT_THRESHOLD_MAX, Math.max(PARENT_THRESHOLD_MIN, n)) * 100) / 100
+
+const numbers = (x: unknown): x is number[] => Array.isArray(x) && x.every((v) => typeof v === 'number' && Number.isFinite(v))
 
 const KEY = 'alexspeak.v2.settings'
 const LEGACY_KEY = 'alexspeak.settings'
@@ -56,6 +77,11 @@ export function loadSettings(storage: StorageLike = safeStorage()): Settings {
   if (!Array.isArray(s.motivatorIds)) s.motivatorIds = DEFAULT_SETTINGS.motivatorIds
   s.customMotivators = Array.isArray(s.customMotivators) ? s.customMotivators.filter((m) => typeof m?.id === 'string') : []
   if (typeof s.childName !== 'string') s.childName = DEFAULT_SETTINGS.childName
+  s.parentVoices = Array.isArray(s.parentVoices) ? s.parentVoices.filter(numbers).slice(0, MAX_PARENTS) : []
+  s.parentPitch = s.parentVoices.map((_, i) => (numbers(s.parentPitch) ? (s.parentPitch[i] ?? 0) : 0))
+  s.parentThreshold = clampParentThreshold(typeof s.parentThreshold === 'number' ? s.parentThreshold : DEFAULT_SETTINGS.parentThreshold)
+  s.keepClips = s.keepClips === true
+  s.cameraEnabled = s.cameraEnabled === true
 
   if (!s.importedLegacy) {
     // One-time upgrade from the old app: take the name only; the old key is left in place.

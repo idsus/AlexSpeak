@@ -41,4 +41,16 @@ describe('Progress', () => {
     expect(html.match(/var\(--hue-choose\)/g)).toHaveLength(1)
     expect(html).toContain('aria-label="touched or seen"')
   })
+
+  it('shows the untapped guess as lighter segments and counts looks', () => {
+    const log: LogRecord[] = [
+      { kind: 'attempt', t: now - day, activity: 'ask', target: 'more', channel: 'sound', prompts: 0, suggested: 'close', looked: true },
+      { kind: 'sat', t: now - day, activity: 'ask', target: 'more', looked: true },
+    ]
+    const html = renderToStaticMarkup(<Progress childName="Sam" log={log} garden={{ stars: 0, flowers: 0 }} now={now} />)
+    expect(html.match(/var\(--hue-ask\)/g)).toHaveLength(4) // up to sound (the mic heard it) plus close
+    expect(html.match(/opacity:0.4/g)).toHaveLength(1) // close is only the app's guess, so lighter
+    expect(html).toContain("lighter = app&#x27;s guess")
+    expect(html).toContain('…and looked 2 times')
+  })
 })

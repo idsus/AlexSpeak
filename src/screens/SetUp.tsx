@@ -5,6 +5,9 @@ import { getAllTargetImages, putTargetImage } from '../data/imageStore'
 import { fileToResizedDataUrl } from '../data/imageProcessing'
 import { listSystemVoices, speakPreview } from '../audio/playClip'
 import { MicMeter } from '../ui/MicMeter'
+import { CameraSetUp } from '../vision/CameraSetUp'
+import { VoiceCard } from './VoiceCard'
+import { HeardCard } from './HeardCard'
 
 const LENGTHS: Settings['sessionMinutes'][] = [2, 3, 5]
 const MIC_LEVELS: { id: MicLevel; label: string }[] = [
@@ -17,7 +20,10 @@ const slug = (s: string) => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').r
 
 export function SetUp({ settings, onChange }: { settings: Settings; onChange: (s: Settings) => void }) {
   const name = displayName(settings.childName)
-  const set = (patch: Partial<Settings>) => onChange({ ...settings, ...patch })
+  // Latest settings, so a patch made after a 10 s recording does not undo changes made meanwhile.
+  const latest = useRef(settings)
+  latest.current = settings
+  const set = (patch: Partial<Settings>) => onChange({ ...latest.current, ...patch })
 
   const [photos, setPhotos] = useState<Record<string, string>>({})
   useEffect(() => {
@@ -145,6 +151,9 @@ export function SetUp({ settings, onChange }: { settings: Settings; onChange: (s
             </div>
           )}
         </section>
+
+        <VoiceCard settings={settings} name={name} set={set} />
+        <HeardCard settings={settings} name={name} set={set} />
       </div>
 
       <div className="pa-col">
@@ -170,6 +179,8 @@ export function SetUp({ settings, onChange }: { settings: Settings; onChange: (s
           </div>
           <MicMeter micLevel={settings.micLevel} />
         </section>
+
+        <CameraSetUp enabled={settings.cameraEnabled} onChange={(cameraEnabled) => set({ cameraEnabled })} childName={name} />
 
         <section className="pa-card">
           <div className="pa-setting">

@@ -1,0 +1,12 @@
+/* Camera Set-up card: only what Parent.css's pa-* classes don't cover. */
+.vi-preview { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.vi-video {
+  flex: none; width: 200px; max-width: 100%; aspect-ratio: 4 / 3;
+  border-radius: var(--radius-sm); background: var(--surface-2); object-fit: cover;
+  transform: scaleX(-1); /* mirrored, like a mirror */
+}
+.vi-readout { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 12px; }
+.vi-look { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 17px; font-weight: 700; color: var(--ink); }
+/* Colour change only, no transition; the text beside it carries the meaning. */
+.vi-dot { width: 16px; height: 16px; border-radius: 999px; flex: none; background: var(--line); }
+.vi-dot--on { background: var(--hue-song-deep); }

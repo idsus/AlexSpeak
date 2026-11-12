@@ -4,8 +4,19 @@ import { ACTIVITIES, type ActivityId } from './content'
 export type Channel = 'sound' | 'touch' | 'parent'
 export type Rung = 'looked' | 'reached' | 'sound' | 'close' | 'word'
 export type LogRecord =
-  | { kind: 'attempt'; t: number; activity: ActivityId; target: string; channel: Channel; rung?: Rung; prompts: number }
-  | { kind: 'sat'; t: number; activity: ActivityId; target: string }
+  | {
+      kind: 'attempt'
+      t: number
+      activity: ActivityId
+      target: string
+      channel: Channel
+      rung?: Rung // the parent's chip: the training label, always wins
+      prompts: number
+      suggested?: Rung // the app's closeness guess when the parent didn't tap
+      closeness?: number // DTW distance to this word's templates, for per-child percentiles
+      looked?: boolean // the camera saw a face towards the screen during the wait
+    }
+  | { kind: 'sat'; t: number; activity: ActivityId; target: string; looked?: boolean }
   | { kind: 'session'; t: number; ms: number }
 
 type Attempt = Extract<LogRecord, { kind: 'attempt' }>
@@ -45,8 +56,10 @@ export interface WeekSummary {
   words: number
   requests: number
   favourite: ActivityId | null
-  byWord: { target: string; best: Rung | null; count: number }[]
+  /** best = what the parent confirmed (or the mic heard); guess = higher rung only the app suggested. */
+  byWord: { target: string; best: Rung | null; guess: Rung | null; count: number }[]
   byActivity: Record<ActivityId, number>
+  looked: number
 }
 
 /** The rung an attempt counts as: the parent's chip, else 'sound' when the mic fired. */
@@ -57,11 +70,12 @@ export function weekSummary(log: LogRecord[], now: number = Date.now()): WeekSum
   const recent = log.filter((r) => r.t > now - WEEK && r.t <= now)
   const attempts = recent.filter((r): r is Attempt => r.kind === 'attempt')
   const byActivity = Object.fromEntries(ACTIVITIES.map((a) => [a.id, 0])) as Record<ActivityId, number>
-  const words = new Map<string, { target: string; best: Rung | null; count: number }>()
+  const words = new Map<string, WeekSummary['byWord'][number]>()
   for (const a of attempts) {
     byActivity[a.activity] = (byActivity[a.activity] ?? 0) + 1
-    const w = words.get(a.target) ?? { target: a.target, best: null, count: 0 }
+    const w = words.get(a.target) ?? { target: a.target, best: null, guess: null, count: 0 }
     w.best = better(w.best, effectiveRung(a))
+    if (!a.rung && a.suggested) w.guess = better(w.guess, a.suggested)
     w.count += 1
     words.set(a.target, w)
   }
@@ -75,8 +89,11 @@ export function weekSummary(log: LogRecord[], now: number = Date.now()): WeekSum
     words: count('word'),
     requests: byActivity.ask,
     favourite: top > 0 ? (Object.keys(byActivity) as ActivityId[]).find((k) => byActivity[k] === top)! : null,
-    byWord: [...words.values()].sort((a, b) => b.count - a.count),
+    byWord: [...words.values()]
+      .map((w) => ({ ...w, guess: RUNGS.indexOf(w.guess as Rung) > RUNGS.indexOf(w.best as Rung) ? w.guess : null }))
+      .sort((a, b) => b.count - a.count),
     byActivity,
+    looked: recent.filter((r) => (r.kind === 'attempt' || r.kind === 'sat') && r.looked).length,
   }
 }
 

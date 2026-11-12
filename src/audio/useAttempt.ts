@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { DetectionFuser } from '../engine/detection'
 import { micThresholds, type MicLevel } from '../data/settings'
 import type { Channel } from '../data/log'
-import type { MicChannelOptions } from './vadChannel'
+import type { Segment } from '../engine/eval/engine'
+import type { MicChannelOptions, ParentConfig } from './vadChannel'
 
 export type MicState = 'off' | 'asking' | 'on' | 'denied'
 
@@ -21,6 +22,8 @@ export interface MicChannelLike {
   destroy(): Promise<void>
   setSensitivity(n: number): void
   setNoiseRejection(n: number): void
+  setBoost?(on: boolean): void
+  setParent?(p: ParentConfig): void
 }
 
 export type MicFactory = (opts: MicChannelOptions) => Promise<MicChannelLike>
@@ -38,6 +41,9 @@ export class AttemptController {
   private armed = false
   private channel: MicChannelLike | null = null
   private destroyed = false
+  private boost = false
+  private parent: ParentConfig | undefined
+  onSegment: (s: Segment) => void = () => {}
   private readonly fuser: DetectionFuser
 
   constructor(onAttempt: (c: Channel) => void, private readonly factory: MicFactory = defaultFactory) {
@@ -59,6 +65,17 @@ export class AttemptController {
   reportTouch(): void { this.fuser.report('touch') }
   reportParent(): void { this.fuser.report('parent') }
 
+  /** The camera saw the mouth move: lower the VAD bar a little. Never an attempt on its own. */
+  setBoost(on: boolean): void {
+    this.boost = on
+    this.channel?.setBoost?.(on)
+  }
+
+  setParent(p: ParentConfig): void {
+    this.parent = p
+    this.channel?.setParent?.(p)
+  }
+
   setMicLevel(level: MicLevel): void {
     const t = micThresholds(level)
     this.channel?.setSensitivity(t.sensitivity)
@@ -72,7 +89,9 @@ export class AttemptController {
       const channel = await this.factory({
         ...micThresholds(level),
         voiceProfile: 'wide', // children's voices vary a lot; never miss an atypical sound
+        parent: this.parent,
         onAttempt: () => this.fuser.report('sound'),
+        onSegment: (s) => this.onSegment(s),
         onScore: (s) => {
           if (Math.abs(s.volume - this.level) < 2) return
           this.level = s.volume
@@ -84,6 +103,7 @@ export class AttemptController {
         return
       }
       this.channel = channel
+      channel.setBoost?.(this.boost)
       void (this.armed ? channel.resume() : channel.pause())
       this.set('on')
     } catch {
@@ -109,10 +129,26 @@ export class AttemptController {
   }
 }
 
-export function useAttempt(opts: { armed: boolean; micLevel: MicLevel; onAttempt: (c: Channel) => void }): AttemptApi {
+const NO_VOICES: number[][] = []
+const NO_PITCHES: number[] = []
+
+export function useAttempt(opts: {
+  armed: boolean
+  micLevel: MicLevel
+  onAttempt: (c: Channel) => void
+  onSegment?: (s: Segment) => void
+  boost?: boolean
+  parent?: ParentConfig
+}): AttemptApi {
   const onAttempt = useRef(opts.onAttempt)
   onAttempt.current = opts.onAttempt
-  const [controller] = useState(() => new AttemptController((c) => onAttempt.current(c)))
+  const onSegment = useRef(opts.onSegment)
+  onSegment.current = opts.onSegment
+  const [controller] = useState(() => {
+    const c = new AttemptController((ch) => onAttempt.current(ch))
+    c.onSegment = (s) => onSegment.current?.(s)
+    return c
+  })
   const [, rerender] = useState(0)
 
   useEffect(() => {
@@ -123,6 +159,9 @@ export function useAttempt(opts: { armed: boolean; micLevel: MicLevel; onAttempt
 
   useEffect(() => controller.setArmed(opts.armed), [controller, opts.armed])
   useEffect(() => controller.setMicLevel(opts.micLevel), [controller, opts.micLevel])
+  useEffect(() => controller.setBoost(!!opts.boost), [controller, opts.boost])
+  const { voices = NO_VOICES, pitches = NO_PITCHES, threshold = 0 } = opts.parent ?? {}
+  useEffect(() => controller.setParent({ voices, pitches, threshold }), [controller, voices, pitches, threshold])
 
   return {
     armed: opts.armed,

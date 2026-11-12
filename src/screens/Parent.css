@@ -133,6 +133,28 @@
 
 .pa-footer { font-size: 14px; font-weight: 600; color: var(--ink-3-text); text-align: center; }
 
+/* ---- Engine: your voice, what the mic heard, record a word ---- */
+.pa-heard { display: flex; flex-direction: column; gap: 4px; }
+.pa-heard-row { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: 1.5px solid var(--line); }
+.pa-heard-row:first-child { border-top: 0; padding-top: 0; }
+.pa-heard-what { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+.pa-heard-time { font-size: 15px; font-weight: 700; color: var(--ink-3-text); font-variant-numeric: tabular-nums; }
+.pa-heard-row .pa-setting-name { font-size: 17px; }
+.pa-rec-word { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pa .parent-btn:has(.hold-ring) { padding-left: 6px; }
+.pa-rec-word--compact { margin-left: auto; }
+.pa-rec-icon {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px;
+  padding: 0; border: 0; border-radius: var(--radius-pill); background: transparent;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.pa-rec-icon:active { transform: scale(0.97); }
+.pa-rec-icon > span, .parent-btn > span:has(> .hold-ring) { display: flex; }
+.pa-rec-word--compact { flex-wrap: nowrap; }
+/* Each row now carries a record button too, so a column needs room for word + mic + bar. */
+.pa-word-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.pa-rec-word--compact .pa-note { font-size: 13px; max-width: 120px; line-height: 1.3; }
+
 @media (hover: hover) and (pointer: fine) {
   .pa-tabs button:not([aria-selected="true"]):hover, .pa-close:hover, .pa-chip:hover, .pa-seg button:not([aria-pressed="true"]):hover { border-color: var(--ink-3); }
 }

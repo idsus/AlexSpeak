@@ -3,6 +3,7 @@ import { ACTIVITIES, activityInfo, type ActivityId } from '../data/content'
 import { RUNGS, slpSummary, weekSummary, type LogRecord } from '../data/log'
 import type { Garden } from '../data/garden'
 import { displayName } from '../data/settings'
+import { RecordWord } from './Recorder'
 
 const WEEK = 7 * 24 * 60 * 60 * 1000
 const MAX_ROWS = 12 // most-tried words only; the SLP summary has the full list
@@ -61,7 +62,8 @@ export function Progress(props: { childName: string; log: LogRecord[]; garden: G
         ) : (
           <p className="pa-sentence">
             {name} {w.plays > 0 && <>played <em>{n(w.plays, 'time')}</em> and </>}made <em>{n(w.attempts, 'try', 'tries')}</em>
-            {w.attempts > 0 && (rungs.length ? `: ${rungs.join(', ')}` : ' that you saw')}.
+            {w.attempts > 0 && (rungs.length ? `: ${rungs.join(', ')}` : ' that you saw')}
+            {w.looked > 0 && ` …and looked ${n(w.looked, 'time')}`}.
             {w.favourite && ` ${name}'s favourite was ${label(w.favourite)}`}
             {w.favourite && (topAsk ? `, and ${name} asked for ${topAsk[0]} ${n(topAsk[1], 'time')}.` : '.')}
           </p>
@@ -77,12 +79,17 @@ export function Progress(props: { childName: string; log: LogRecord[]; garden: G
             <ul className="pa-word-grid">
               {w.byWord.slice(0, MAX_ROWS).map((row) => {
                 const filled = row.best ? RUNGS.indexOf(row.best) + 1 : 1 // touched / seen still counts
+                const guessed = row.guess ? RUNGS.indexOf(row.guess) + 1 : filled
+                const hue = hueOf.get(row.target) ?? 'song'
+                const fill = (i: number) =>
+                  i < filled ? { background: `var(--hue-${hue})` } : i < guessed ? { background: `var(--hue-${hue})`, opacity: 0.4 } : undefined
                 return (
                   <li key={row.target} className="pa-word-row">
                     <span className="pa-word">{row.target}</span>
-                    <span className="pa-bar" role="img" aria-label={row.best ?? 'touched or seen'}>
+                    <RecordWord word={row.target} compact />
+                    <span className="pa-bar" role="img" aria-label={(row.best ?? 'touched or seen') + (row.guess ? `, app's guess ${row.guess}` : '')}>
                       {RUNGS.map((r, i) => (
-                        <i key={r} style={i < filled ? { background: `var(--hue-${hueOf.get(row.target) ?? 'song'})` } : undefined} />
+                        <i key={r} style={fill(i)} />
                       ))}
                     </span>
                   </li>
@@ -90,7 +97,10 @@ export function Progress(props: { childName: string; log: LogRecord[]; garden: G
               })}
             </ul>
           )}
-          <p className="pa-note pa-legend">{RUNGS.join(' · ')}</p>
+          <p className="pa-note pa-legend">
+            {RUNGS.join(' · ')}
+            {w.byWord.some((r) => r.guess) && " · lighter = app's guess"}
+          </p>
         </section>
 
         <div className="pa-side">

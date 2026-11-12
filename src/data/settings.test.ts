@@ -50,3 +50,30 @@ describe('settings', () => {
     expect(importLegacyPhotos(s, ['teddy']).customMotivators).toHaveLength(1)
   })
 })
+
+describe('settings migration for the engine fields', () => {
+  it('fills the new fields on settings saved before they existed', () => {
+    const storage = new MemoryStorage()
+    storage.setItem('alexspeak.v2.settings', JSON.stringify({ version: 2, childName: 'Sam', importedLegacy: true }))
+    const s = loadSettings(storage)
+    expect(s).toMatchObject({ childName: 'Sam', parentVoices: [], parentPitch: [], parentThreshold: 0.45, keepClips: false, cameraEnabled: false })
+  })
+
+  it('repairs bad values: drops broken voices, caps at two adults, clamps the threshold', () => {
+    const storage = new MemoryStorage()
+    storage.setItem('alexspeak.v2.settings', JSON.stringify({
+      version: 2, importedLegacy: true,
+      parentVoices: [[0.1, 0.2], 'x', [0.3, null], [0.5, 0.5], [0.7, 0.1]],
+      parentPitch: [110],
+      parentThreshold: 2,
+      keepClips: 'yes',
+      cameraEnabled: true,
+    }))
+    const s = loadSettings(storage)
+    expect(s.parentVoices).toEqual([[0.1, 0.2], [0.5, 0.5]])
+    expect(s.parentPitch).toEqual([110, 0])
+    expect(s.parentThreshold).toBe(0.7)
+    expect(s.keepClips).toBe(false)
+    expect(s.cameraEnabled).toBe(true)
+  })
+})

@@ -36,3 +36,12 @@ number is trusted.
      An attempt within 1.0 s after a labelled start counts as caught; anything else the
      engine fires on is a false accept.
 4. Run `npm run engine:eval`.
+
+## Known-adult veto
+
+`npm run engine:eval -- --parent <wav>` enrols a parent prototype from that clip (needs
+`node tools/fetch_speaker.mjs`) and prints a second table with the veto on, marking each
+vetoed segment and its cosine score. With the synthetic tones this only proves the
+plumbing: a pure tone is not a voice, so child tones score close to the 120 Hz "parent"
+(cos ≈ 0.4–0.5) and some are vetoed. Real numbers need a real parent enrolment clip and
+real child clips.
